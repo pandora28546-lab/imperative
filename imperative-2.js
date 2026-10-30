@@ -1555,12 +1555,15 @@ function revealStart(){if(loadRevealed)return;loadRevealed=true;onLoaded()}
   imgs.forEach(function(u){var im=new Image();im.onload=im.onerror=tick;im.src=u})})();
 document.querySelectorAll("#sofia-game .sg-starsym").forEach(function(im){im.src=STAR_URL});
 game.style.setProperty("--sg-star-mask",'url("'+STAR_URL+'")');$id("sg-bigstar-img").src=STAR_URL;
+[].slice.call(document.querySelectorAll("#sofia-game .sg-starsym, #sg-bigstar-img")).forEach(function(im){try{if(im.decode)im.decode().catch(function(){})}catch(e){}});
 
 /* ─── состояние ─── */
 var idx=0,phase="intro",t0=0,hintAt=1e9,first=true,clock=0,last=performance.now()/1000,started=false,loadedReady=false,stageBusy=false;
 var starBacks=[].slice.call(document.querySelectorAll("#sofia-game .sg-starback"));
 function cur(){return scenes[idx]}
-function show(i){buildScene(i);scenes.forEach(function(sc,k){if(sc)sc.svg.style.display=k===i?"":"none"});idx=i;still(cur())}
+function show(i){buildScene(i);scenes.forEach(function(sc,k){if(sc){sc.svg.style.display=k===i?"":"none";sc.svg.style.zIndex=k===i?1:0}});idx=i;still(cur())}
+/* следующая сцена заранее отрисовывается под текущей (свой слой), чтобы «Дальше» не дёргало кадр */
+function prewarm(){var k=idx+1;if(k>=ITEMS.length)return;var sc=buildScene(k);still(sc);sc.svg.style.zIndex=0;sc.svg.style.display=""}
 function hideHint(){cur().hint.setAttribute("opacity",0);hintAt=1e9}
 function showBtns(on){game.classList.toggle("sg-btns",on)}
 
@@ -1590,7 +1593,7 @@ function flyBigStar(slot,cb){var back=starBacks[slot],gr=game.getBoundingClientR
       big.style.transform="translate(calc(-50% + "+dx+"px), calc(-50% + "+dy+"px)) scale("+s+")";
       setTimeout(function(){back.classList.add("sg-earned");big.style.display="none";if(cb)cb()},720)},600)})})}
 function pulseAllStars(){starBacks.forEach(function(b,i){setTimeout(function(){b.classList.remove("sg-pulse");void b.offsetWidth;b.classList.add("sg-pulse")},i*180)})}
-function sceneDone(){var q=idx%4,s=Math.floor(idx/4);
+function sceneDone(){var q=idx%4,s=Math.floor(idx/4);prewarm();
   if(q<3){showBtns(true);return}
   if(starBacks[s].classList.contains("sg-earned")){if(idx===ITEMS.length-1)finishGame();else showBtns(true);return}
   stageBusy=true;playFx("stage complete.wav");launchFireworks();
@@ -1600,7 +1603,7 @@ function restart(){$id("sg-end-overlay").classList.remove("sg-show");stopFirewor
 
 /* ─── кнопки ─── */
 $id("sg-again").addEventListener("click",function(){if(stageBusy)return;startScene(false)});
-$id("sg-go").addEventListener("click",function(){if(stageBusy)return;if(idx<ITEMS.length-1){show(idx+1);startScene(false)}});
+$id("sg-go").addEventListener("click",function(){if(stageBusy)return;if(idx<ITEMS.length-1){showBtns(false);var n=idx+1;requestAnimationFrame(function(){show(n);startScene(false)})}});
 $id("sg-repeat").addEventListener("click",function(){if(!started||(phase!=="voice"&&phase!=="ready"))return;var sc=cur(),my=++sceneToken;hideHint();phase="voice";
   playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+HINT_NEXT})});
 $id("sg-music").addEventListener("click",function(){musicOn=!musicOn;this.classList.toggle("sg-off",!musicOn);[runEl,finEl].forEach(function(a){a.muted=!musicOn})});
