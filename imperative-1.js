@@ -1571,8 +1571,7 @@ function showBtns(on){game.classList.toggle("sg-btns",on)}
 /* сцена: (первая) «Повтори» → команда → подсказка; остальные: команда → подсказка через 3 с */
 function startScene(isFirst){var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
   var my=++sceneToken;
-  var at=idx;setTimeout(function(){if(at===idx&&phase==="voice")prewarm()},150);   /* сразу после смены сцены, пока животное стоит */
-  setTimeout(function(){if(my!==sceneToken||phase!=="voice")return;
+    setTimeout(function(){if(my!==sceneToken||phase!=="voice")return;
     var cmd=function(){if(my!==sceneToken||phase!=="voice")return;playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+(isFirst?HINT_FIRST:HINT_NEXT)})};
     if(isFirst)playSpeech(REPO+POVTORI,cmd);else cmd()},(isFirst?.3:PRE_VOICE)*1000)}
 var sceneToken=0;
@@ -1605,7 +1604,12 @@ function restart(){$id("sg-end-overlay").classList.remove("sg-show");stopFirewor
 
 /* ─── кнопки ─── */
 $id("sg-again").addEventListener("click",function(){if(stageBusy)return;startScene(false)});
-$id("sg-go").addEventListener("click",function(){if(stageBusy)return;if(idx<ITEMS.length-1){showBtns(false);var n=idx+1;requestAnimationFrame(function(){show(n);startScene(false)})}});
+/* смена сцены под мягкой «шторкой»: первая отрисовка новой сцены проходит, пока экран закрыт, — рывка не видно */
+var veil=document.createElement("div");veil.id="sg-veil";stage.appendChild(veil);
+$id("sg-go").addEventListener("click",function(){if(stageBusy||veil.classList.contains("on"))return;if(idx>=ITEMS.length-1)return;showBtns(false);var n=idx+1;
+  veil.classList.add("on");
+  setTimeout(function(){show(n);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(function(){veil.classList.remove("on");startScene(false)},60)})})},260)});
 $id("sg-repeat").addEventListener("click",function(){if(!started||(phase!=="voice"&&phase!=="ready"))return;var sc=cur(),my=++sceneToken;hideHint();phase="voice";
   playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+HINT_NEXT})});
 $id("sg-music").addEventListener("click",function(){musicOn=!musicOn;this.classList.toggle("sg-off",!musicOn);[runEl,finEl].forEach(function(a){a.muted=!musicOn})});
