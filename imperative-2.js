@@ -19,8 +19,11 @@ function hill(parent,id,d0,fill){return el("path",{id:id,d:d0+" L3200 2100 L-160
 (function(){var c=document.createElement("canvas");c.width=c.height=180;var g=c.getContext("2d"),d=g.createImageData(180,180);for(var i=0;i<d.data.length;i+=4){var v=222+Math.random()*33;d.data[i]=0;d.data[i+1]=0;d.data[i+2]=0;d.data[i+3]=Math.round((255-v)*.35)}g.putImageData(d,0,0);
   var pat=el("pattern",{id:"grainPat",width:180,height:180,patternUnits:"userSpaceOnUse"},DEFS);el("image",{href:c.toDataURL(),width:180,height:180},pat)})();
 var clipN=0;
-function grain(parent,ids){var id="cg"+(clipN++),cp=el("clipPath",{id:id},DEFS);ids.forEach(function(x){el("use",{href:"#"+x},cp)});
-  return el("rect",{x:BIG.x,y:BIG.y,width:BIG.w,height:BIG.h,fill:"url(#grainPat)","clip-path":"url(#"+id+")",style:"pointer-events:none"},parent)}
+/* зерно: копии самих фигур земли с узором-шумом — без clip-path и без mix-blend-mode */
+var GRAINS=[],GEO=["d","cx","cy","rx","ry","x","y","width","height","transform","points"];
+function grain(parent,ids){var g=el("g",{style:"pointer-events:none"},parent);ids.forEach(function(x){GRAINS.push({id:x,g:g,c:null})});return g}
+function syncGrain(){GRAINS.forEach(function(o){var s=document.getElementById(o.id);if(!s)return;if(!o.c||o.c.tagName!==s.tagName){if(o.c)o.c.remove();o.c=el(s.tagName,{fill:"url(#grainPat)"},o.g)}
+  GEO.forEach(function(a){var v=s.getAttribute(a);if(v!=null)o.c.setAttribute(a,v)})})}
 function blades(g,n,x0,x1,y0,y1,col,len,w){var D=["","",""];for(var i=0;i<n;i++){var x=rr(x0,x1),y=rr(y0,y1),h=len*(.6+.4*(y-y0)/(y1-y0+1)),o=rr(.35,.7);
   D[o<.47?0:o<.58?1:2]+="M"+f1(x)+" "+f1(y)+" q"+f1(rr(-3,3))+" "+f1(-h*.6)+" "+f1(rr(-5,5))+" "+f1(-h)}
   [.41,.52,.64].forEach(function(op,k){if(D[k])el("path",{d:D[k],stroke:col,"stroke-width":w,"stroke-linecap":"round",fill:"none",opacity:op},g)})}
@@ -1519,7 +1522,7 @@ function buildScene(k){if(scenes[k])return scenes[k];var it=ITEMS[k];
   var vb=S.vb.split(" ").map(Number);
   var hint=el("g",{opacity:0},svg),waves=[0,1,2].map(function(){return el("circle",{r:f1(vb[2]*.065),fill:"none",stroke:"#6B91D6","stroke-width":4,"vector-effect":"non-scaling-stroke",opacity:0},hint)});
   svg.style.display="none";
-  var sc={svg:svg,S:S,hint:hint,waves:waves,vb:vb,v:it.v};scenes[k]=sc;S.init();still(sc);return sc}
+  var sc={svg:svg,S:S,hint:hint,waves:waves,vb:vb,v:it.v};scenes[k]=sc;S.init();syncGrain();still(sc);return sc}
 buildScene(0);
 function cam(sc){if(sc.S.cam){var v=sc.S.cam();sc.vb=v;sc.svg.setAttribute("viewBox",v.map(f1).join(" "))}}
 function still(sc){sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);cam(sc);sc.hint.setAttribute("opacity",0)}
@@ -1609,7 +1612,9 @@ function pauseBg(){try{speechEl.pause()}catch(e){}stopMusic()}
 document.addEventListener("visibilitychange",function(){if(document.hidden)pauseBg()});window.addEventListener("pagehide",pauseBg);
 
 /* ─── кадр ─── */
-function frame(){var n=performance.now()/1000,full=Math.min(.5,n-last);last=n;var steps=Math.max(1,Math.ceil(full/.034)),h=full/steps;
+function frame(){var n=performance.now()/1000,full=Math.min(.5,n-last);last=n;if(FPS)fpsTick(n);
+  if(!started){requestAnimationFrame(frame);return}   /* до старта сцена стоит: не мешаем лоадеру и размытию стартового экрана */
+  var steps=Math.max(1,Math.ceil(full/.034)),h=full/steps;
   for(var st=0;st<steps;st++)step(h);cam(cur());requestAnimationFrame(frame)}
 function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
   S.ambient(t,dt,phase);
@@ -1619,6 +1624,10 @@ function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
         tr(wv,"translate("+f1(c.x)+" "+f1(c.y)+") scale("+(.5+1.3*k).toFixed(3)+")");wv.setAttribute("opacity",(.8*(1-k)).toFixed(3))})}}
   else if(phase==="act"){var done=S.act(e,dt,first,t);first=false;if(done||e>=S.ACT){phase="fin";t0=t;playMusic(finEl,finURL(sc.v))}}
   else if(phase==="fin"||phase==="post"||phase==="end"){S.fin(e,t,dt);if(phase==="fin"&&e>BTN_AFTER){phase="post";sceneDone()}}}
+/* счётчик кадров для проверки: добавить ?fps к адресу страницы */
+var FPS=/[?&]fps/.test(location.search)||/[?&]fps/.test((function(){try{return top.location.search}catch(e){return ""}})()),fpsEl=null,fpsN=0,fpsT=0;
+function fpsTick(n){if(!fpsEl){fpsEl=document.createElement("div");fpsEl.style.cssText="position:absolute;left:8px;bottom:8px;z-index:300;background:rgba(0,0,0,.6);color:#fff;font:700 14px/1 monospace;padding:6px 8px;border-radius:8px;pointer-events:none";game.appendChild(fpsEl)}
+  fpsN++;if(n-fpsT>=1){fpsEl.textContent=Math.round(fpsN/(n-fpsT))+" fps";fpsN=0;fpsT=n}}
 show(0);requestAnimationFrame(frame);
 
 /* ─── салют ─── */
