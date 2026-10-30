@@ -1561,15 +1561,17 @@ game.style.setProperty("--sg-star-mask",'url("'+STAR_URL+'")');$id("sg-bigstar-i
 var idx=0,phase="intro",t0=0,hintAt=1e9,first=true,clock=0,last=performance.now()/1000,started=false,loadedReady=false,stageBusy=false;
 var starBacks=[].slice.call(document.querySelectorAll("#sofia-game .sg-starback"));
 function cur(){return scenes[idx]}
-function show(i){buildScene(i);scenes.forEach(function(sc,k){if(sc){sc.svg.style.display=k===i?"":"none";sc.svg.style.zIndex=k===i?1:0}});idx=i;still(cur())}
+function show(i){buildScene(i);var warm=warmIdx===i;scenes.forEach(function(sc,k){if(sc){sc.svg.style.display=k===i?"":"none";sc.svg.style.zIndex=k===i?1:0}});idx=i;warmIdx=-1;if(!warm)still(cur())}
 /* следующая сцена заранее отрисовывается под текущей (свой слой), чтобы «Дальше» не дёргало кадр */
-function prewarm(){var k=idx+1;if(k>=ITEMS.length)return;var sc=buildScene(k);still(sc);sc.svg.style.zIndex=0;sc.svg.style.display=""}
+var warmIdx=-1;
+function prewarm(){var k=idx+1;if(k>=ITEMS.length||warmIdx===k)return;var sc=buildScene(k);still(sc);sc.svg.style.zIndex=0;sc.svg.style.display="";warmIdx=k}
 function hideHint(){cur().hint.setAttribute("opacity",0);hintAt=1e9}
 function showBtns(on){game.classList.toggle("sg-btns",on)}
 
 /* сцена: (первая) «Повтори» → команда → подсказка; остальные: команда → подсказка через 3 с */
 function startScene(isFirst){var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
   var my=++sceneToken;
+  var at=idx;setTimeout(function(){if(at===idx&&phase==="voice")prewarm()},150);   /* сразу после смены сцены, пока животное стоит */
   setTimeout(function(){if(my!==sceneToken||phase!=="voice")return;
     var cmd=function(){if(my!==sceneToken||phase!=="voice")return;playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+(isFirst?HINT_FIRST:HINT_NEXT)})};
     if(isFirst)playSpeech(REPO+POVTORI,cmd);else cmd()},(isFirst?.3:PRE_VOICE)*1000)}
@@ -1593,7 +1595,7 @@ function flyBigStar(slot,cb){var back=starBacks[slot],gr=game.getBoundingClientR
       big.style.transform="translate(calc(-50% + "+dx+"px), calc(-50% + "+dy+"px)) scale("+s+")";
       setTimeout(function(){back.classList.add("sg-earned");big.style.display="none";if(cb)cb()},720)},600)})})}
 function pulseAllStars(){starBacks.forEach(function(b,i){setTimeout(function(){b.classList.remove("sg-pulse");void b.offsetWidth;b.classList.add("sg-pulse")},i*180)})}
-function sceneDone(){var q=idx%4,s=Math.floor(idx/4);prewarm();
+function sceneDone(){var q=idx%4,s=Math.floor(idx/4);
   if(q<3){showBtns(true);return}
   if(starBacks[s].classList.contains("sg-earned")){if(idx===ITEMS.length-1)finishGame();else showBtns(true);return}
   stageBusy=true;playFx("stage complete.wav");launchFireworks();
