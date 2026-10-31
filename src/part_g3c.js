@@ -127,7 +127,7 @@ function makeTAKE(R){
   el("path",{d:"M-18 -6 L54 -8 Q66 -3 54 2 L-18 2Z",fill:"#A86448",stroke:"#A86448","stroke-width":7,"stroke-linejoin":"round"},thigh);
   el("path",{d:"M-30 -56 C-36 -94 -16 -138 14 -148 C38 -154 48 -128 44 -98 C40 -72 30 -46 10 -34 C-8 -26 -26 -36 -30 -56Z",fill:"#C47860"},KB);
   el("path",{d:"M10 -136 C30 -132 38 -110 32 -84 C26 -62 16 -46 2 -40 C10 -70 6 -110 10 -136Z",fill:"#FDE6C4"},KB);
-  var pBall=mkToy(KB,.4);tr(pBall,"translate(18 -72)");pBall.setAttribute("opacity",0);
+  var pBall=mkToy(KB,.3);tr(pBall,"translate(19 -69)");pBall.setAttribute("opacity",0);
   el("path",{d:"M5 -74 Q19 -62 33 -76 C31 -62 24 -52 12 -48 C7 -56 5 -64 5 -74Z",fill:"#FDE6C4"},KB);el("path",{d:"M5 -74 Q19 -62 33 -76",stroke:"#A86448","stroke-width":3.4,fill:"none","stroke-linecap":"round"},KB);
   el("path",{d:"M4 -138 C8 -158 22 -176 38 -176 L46 -160 C36 -150 26 -140 22 -126Z",fill:"#C47860"},KB);
   var head=el("g",{},KB);
