@@ -66,10 +66,10 @@ function show(i){buildScene(i);var warm=warmIdx===i;scenes.forEach(function(sc,k
 var warmIdx=-1;
 function prewarm(){var k=idx+1;if(k>=ITEMS.length||warmIdx===k)return;var sc=buildScene(k);still(sc);sc.svg.style.zIndex=0;sc.svg.style.display="";warmIdx=k}
 function hideHint(){cur().hint.setAttribute("opacity",0);hintAt=1e9}
-function showBtns(on){game.classList.toggle("sg-btns",on)}
+function showBtns(on){game.classList.toggle("sg-btns",on);if(on)mark("кнопки")}
 
 /* сцена: (первая) «Повтори» → команда → подсказка; остальные: команда → подсказка через 3 с */
-function startScene(isFirst){var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
+function startScene(isFirst){mark("старт сцены");var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
   var my=++sceneToken;
     setTimeout(function(){if(my!==sceneToken||phase!=="voice")return;
     var cmd=function(){if(my!==sceneToken||phase!=="voice")return;playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+(isFirst?HINT_FIRST:HINT_NEXT)})};
@@ -83,7 +83,7 @@ stage.addEventListener("pointerdown",function(ev){
   if(!started||(phase!=="voice"&&phase!=="ready"))return;
   var sc=cur(),p=toSvg(sc,ev),c=sc.S.center(),rad=clamp(210*c.sc,sc.vb[2]*.14,sc.vb[2]*.3);
   if(Math.hypot(p.x-c.x,p.y-c.y)>rad)return;
-  sceneToken++;stopSpeech();hideHint();phase="act";t0=clock;first=true;playMusic(runEl,goURL(sc.v))});
+  mark("тап");sceneToken++;stopSpeech();hideHint();phase="act";t0=clock;first=true;playMusic(runEl,goURL(sc.v))});
 
 /* ─── звёзды / финал ─── */
 function flyBigStar(slot,cb){var back=starBacks[slot],gr=game.getBoundingClientRect(),br=back.getBoundingClientRect();
@@ -97,9 +97,9 @@ function pulseAllStars(){starBacks.forEach(function(b,i){setTimeout(function(){b
 function sceneDone(){var q=idx%4,s=Math.floor(idx/4);
   if(q<3){showBtns(true);return}
   if(starBacks[s].classList.contains("sg-earned")){if(idx===ITEMS.length-1)finishGame();else showBtns(true);return}
-  stageBusy=true;playFx("stage complete.wav");launchFireworks();
+  stageBusy=true;mark("звезда+салют");playFx("stage complete.wav");launchFireworks();
   flyBigStar(s,function(){stageBusy=false;if(idx===ITEMS.length-1)setTimeout(finishGame,400);else showBtns(true)})}
-function finishGame(){phase="end";playFx("fanfare.wav");launchFireworks();pulseAllStars();setTimeout(function(){$id("sg-end-overlay").classList.add("sg-show")},1500)}
+function finishGame(){phase="end";mark("финал");playFx("fanfare.wav");launchFireworks();pulseAllStars();setTimeout(function(){$id("sg-end-overlay").classList.add("sg-show")},1500)}
 function restart(){$id("sg-end-overlay").classList.remove("sg-show");stopFireworks();starBacks.forEach(function(b){b.classList.remove("sg-earned","sg-pulse")});show(0);startScene(true)}
 
 /* ─── кнопки ─── */
@@ -108,7 +108,7 @@ $id("sg-again").addEventListener("click",function(){if(stageBusy)return;startSce
    Тяжёлая первая отрисовка приходится на неподвижную картинку, поэтому рывка не видно. Через 2 кадра слои меняются местами. */
 var frozen=false;
 $id("sg-go").addEventListener("click",function(){if(stageBusy||frozen)return;if(idx>=ITEMS.length-1)return;showBtns(false);var n=idx+1;
-  frozen=true;prewarm();
+  mark("дальше");frozen=true;prewarm();
   requestAnimationFrame(function(){requestAnimationFrame(function(){show(n);frozen=false;startScene(false)})})});
 $id("sg-repeat").addEventListener("click",function(){if(!started||(phase!=="voice"&&phase!=="ready"))return;var sc=cur(),my=++sceneToken;hideHint();phase="voice";
   playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+HINT_NEXT})});
@@ -121,7 +121,7 @@ function pauseBg(){try{speechEl.pause()}catch(e){}stopMusic()}
 document.addEventListener("visibilitychange",function(){if(document.hidden)pauseBg()});window.addEventListener("pagehide",pauseBg);
 
 /* ─── кадр ─── */
-function frame(){var n=performance.now()/1000,full=Math.min(.5,n-last);last=n;if(FPS){if(full>fpsMax)fpsMax=full;fpsTick(n)}
+function frame(){var n=performance.now()/1000,raw=n-last,full=Math.min(.5,raw);last=n;if(FPS)dgFrame(n,raw);
   if(!started){requestAnimationFrame(frame);return}
   if(frozen){requestAnimationFrame(frame);return}   /* пока под сценой рисуется следующая — кадр стоит */   /* до старта сцена стоит: не мешаем лоадеру и размытию стартового экрана */
   var steps=Math.max(1,Math.ceil(full/.034)),h=full/steps;
@@ -132,13 +132,25 @@ function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
     if(phase==="ready"&&t>=hintAt){var c=S.center(),hx=t-hintAt;sc.hint.setAttribute("opacity",1);
       sc.waves.forEach(function(wv,i){var qq=hx-i*1.2;if(qq<0){wv.setAttribute("opacity",0);return}var u=(qq%3.6)/3.6,k=1-Math.pow(1-u,2);
         tr(wv,"translate("+f1(c.x)+" "+f1(c.y)+") scale("+(.5+1.3*k).toFixed(3)+")");wv.setAttribute("opacity",(.8*(1-k)).toFixed(3))})}}
-  else if(phase==="act"){var done=S.act(e,dt,first,t);first=false;if(done||e>=S.ACT){phase="fin";t0=t;playMusic(finEl,finURL(sc.v))}}
+  else if(phase==="act"){var done=S.act(e,dt,first,t);first=false;if(done||e>=S.ACT){phase="fin";t0=t;mark("финал сцены");playMusic(finEl,finURL(sc.v))}}
   else if(phase==="fin"||phase==="post"||phase==="end"){S.fin(e,t,dt);if(phase==="fin"&&e>BTN_AFTER){phase="post";sceneDone()}}}
-/* счётчик кадров для проверки: добавить ?fps к адресу страницы */
-var fpsMax=0;
-var FPS=/[?&]fps/.test(location.search)||/[?&]fps/.test((function(){try{return top.location.search}catch(e){return ""}})()),fpsEl=null,fpsN=0,fpsT=0;
-function fpsTick(n){if(!fpsEl){fpsEl=document.createElement("div");fpsEl.style.cssText="position:absolute;left:8px;bottom:8px;z-index:300;background:rgba(0,0,0,.6);color:#fff;font:700 14px/1 monospace;padding:6px 8px;border-radius:8px;pointer-events:none";game.appendChild(fpsEl)}
-  fpsN++;if(n-fpsT>=1){fpsEl.textContent=Math.round(fpsN/(n-fpsT))+" fps · max "+Math.round(fpsMax*1000)+" ms";fpsN=0;fpsT=n;fpsMax=0}}
+/* ─── диагностика: бар снизу (добавить ?fps к адресу страницы) ───
+   1-я строка: кадры в секунду, худший кадр за секунду, плотность пикселей, размер поля, полный экран.
+   ниже: последние рывки (кадр дольше 50 мс) — сцена, фаза, длительность и что случилось перед ним. */
+var FPS=/[?&]fps/.test(location.search)||/[?&]fps/.test((function(){try{return top.location.search}catch(e){return ""}})());
+var dgBar=null,dgN=0,dgT=0,dgMax=0,dgEv="—",dgEvT=0,dgLog=[];
+function mark(name){if(FPS){dgEv=name;dgEvT=performance.now()/1000}}
+function dgFrame(n,raw){if(!dgBar){dgBar=document.createElement("div");
+    dgBar.style.cssText="position:absolute;left:0;right:0;bottom:0;z-index:300;background:rgba(20,28,48,.82);color:#fff;font:600 12px/1.35 monospace;padding:5px 10px 6px;pointer-events:none;white-space:pre";
+    game.appendChild(dgBar);dgT=n}
+  dgN++;if(raw>dgMax)dgMax=raw;
+  if(raw>.05&&started){var ago=n-raw-dgEvT;
+    dgLog.unshift("рывок "+Math.round(raw*1000)+" мс · сцена "+(idx+1)+" "+ITEMS[idx].v+" · "+phase+" · "+(ago<3&&ago>-.1?ago.toFixed(2)+" с после «"+dgEv+"»":"без события"));
+    if(dgLog.length>4)dgLog.pop()}
+  if(n-dgT>=1){var r=game.getBoundingClientRect();
+    dgBar.textContent=Math.round(dgN/(n-dgT))+" fps · худший "+Math.round(dgMax*1000)+" мс · DPR "+(window.devicePixelRatio||1)+" · поле "+Math.round(r.width)+"×"+Math.round(r.height)+" · полн.экран "+(isFS()?"да":"нет")+
+      (dgLog.length?"\n"+dgLog.join("\n"):"\nрывков пока нет");
+    dgN=0;dgT=n;dgMax=0}}
 show(0);requestAnimationFrame(frame);
 
 /* ─── салют ─── */
@@ -173,9 +185,9 @@ function onLoaded(){$id("sg-loading").style.display="none";loadedReady=true;if(i
 function enterFS(){if(canRealFS){var req=fsWrap.requestFullscreen||fsWrap.webkitRequestFullscreen;try{var p=req.call(fsWrap);if(p&&p.then)p.then(lockLandscape).catch(pseudoOn);else lockLandscape()}catch(e){pseudoOn()}}else pseudoOn();refreshFsBtn()}
 function exitFS(){if(inRealFS()){var ex=document.exitFullscreen||document.webkitExitFullscreen;try{ex.call(document)}catch(e){}unlockOrientation()}pseudoOff();refreshFsBtn()}
 $id("sg-fs").addEventListener("click",function(){if(isFS())exitFS();else enterFS()});
-document.addEventListener("fullscreenchange",function(){if(!inRealFS())unlockOrientation();syncMobileUI();refreshFsBtn()});
-document.addEventListener("webkitfullscreenchange",function(){if(!inRealFS())unlockOrientation();syncMobileUI();refreshFsBtn()});
+document.addEventListener("fullscreenchange",function(){mark("полн.экран");if(!inRealFS())unlockOrientation();syncMobileUI();refreshFsBtn()});
+document.addEventListener("webkitfullscreenchange",function(){mark("полн.экран");if(!inRealFS())unlockOrientation();syncMobileUI();refreshFsBtn()});
 window.addEventListener("orientationchange",function(){setTimeout(function(){syncMobileUI();refreshFsBtn()},250)});
-var rzT=null;window.addEventListener("resize",function(){if(rzT)clearTimeout(rzT);rzT=setTimeout(function(){syncMobileUI();refreshFsBtn()},200)});
+var rzT=null;window.addEventListener("resize",function(){mark("resize");if(rzT)clearTimeout(rzT);rzT=setTimeout(function(){syncMobileUI();refreshFsBtn()},200)});
 syncMobileUI();refreshFsBtn();
 window.__sg={scenes:scenes,get idx(){return idx},get phase(){return phase},go:function(i){show(i);startScene(false)}};
