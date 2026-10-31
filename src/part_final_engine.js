@@ -66,7 +66,7 @@ function show(i){buildScene(i);var warm=warmIdx===i;scenes.forEach(function(sc,k
 var warmIdx=-1;
 function prewarm(){var k=idx+1;if(k>=ITEMS.length||warmIdx===k)return;var sc=buildScene(k);still(sc);sc.svg.style.zIndex=0;sc.svg.style.display="";warmIdx=k}
 function hideHint(){cur().hint.setAttribute("opacity",0);hintAt=1e9}
-function showBtns(on){game.classList.toggle("sg-btns",on)}
+function showBtns(on){game.classList.toggle("sg-btns",on);if(on)prewarm()}
 
 /* сцена: (первая) «Повтори» → команда → подсказка; остальные: команда → подсказка через 3 с */
 function startScene(isFirst){var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
@@ -104,12 +104,8 @@ function restart(){$id("sg-end-overlay").classList.remove("sg-show");stopFirewor
 
 /* ─── кнопки ─── */
 $id("sg-again").addEventListener("click",function(){if(stageBusy)return;startScene(false)});
-/* смена сцены под мягкой «шторкой»: первая отрисовка новой сцены проходит, пока экран закрыт, — рывка не видно */
-var veil=document.createElement("div");veil.id="sg-veil";stage.appendChild(veil);
-$id("sg-go").addEventListener("click",function(){if(stageBusy||veil.classList.contains("on"))return;if(idx>=ITEMS.length-1)return;showBtns(false);var n=idx+1;
-  veil.classList.add("on");
-  setTimeout(function(){show(n);
-    requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(function(){veil.classList.remove("on");startScene(false)},60)})})},260)});
+/* «Дальше»: следующая сцена уже отрисована под текущей (prewarm), поэтому смена — просто перестановка слоёв, без первой отрисовки */
+$id("sg-go").addEventListener("click",function(){if(stageBusy)return;if(idx>=ITEMS.length-1)return;showBtns(false);show(idx+1);startScene(false)});
 $id("sg-repeat").addEventListener("click",function(){if(!started||(phase!=="voice"&&phase!=="ready"))return;var sc=cur(),my=++sceneToken;hideHint();phase="voice";
   playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+HINT_NEXT})});
 $id("sg-music").addEventListener("click",function(){musicOn=!musicOn;this.classList.toggle("sg-off",!musicOn);[runEl,finEl].forEach(function(a){a.muted=!musicOn})});
@@ -121,7 +117,7 @@ function pauseBg(){try{speechEl.pause()}catch(e){}stopMusic()}
 document.addEventListener("visibilitychange",function(){if(document.hidden)pauseBg()});window.addEventListener("pagehide",pauseBg);
 
 /* ─── кадр ─── */
-function frame(){var n=performance.now()/1000,full=Math.min(.5,n-last);last=n;if(FPS)fpsTick(n);
+function frame(){var n=performance.now()/1000,full=Math.min(.5,n-last);last=n;if(FPS){if(full>fpsMax)fpsMax=full;fpsTick(n)}
   if(!started){requestAnimationFrame(frame);return}   /* до старта сцена стоит: не мешаем лоадеру и размытию стартового экрана */
   var steps=Math.max(1,Math.ceil(full/.034)),h=full/steps;
   for(var st=0;st<steps;st++)step(h);cam(cur());requestAnimationFrame(frame)}
@@ -134,9 +130,10 @@ function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
   else if(phase==="act"){var done=S.act(e,dt,first,t);first=false;if(done||e>=S.ACT){phase="fin";t0=t;playMusic(finEl,finURL(sc.v))}}
   else if(phase==="fin"||phase==="post"||phase==="end"){S.fin(e,t,dt);if(phase==="fin"&&e>BTN_AFTER){phase="post";sceneDone()}}}
 /* счётчик кадров для проверки: добавить ?fps к адресу страницы */
+var fpsMax=0;
 var FPS=/[?&]fps/.test(location.search)||/[?&]fps/.test((function(){try{return top.location.search}catch(e){return ""}})()),fpsEl=null,fpsN=0,fpsT=0;
 function fpsTick(n){if(!fpsEl){fpsEl=document.createElement("div");fpsEl.style.cssText="position:absolute;left:8px;bottom:8px;z-index:300;background:rgba(0,0,0,.6);color:#fff;font:700 14px/1 monospace;padding:6px 8px;border-radius:8px;pointer-events:none";game.appendChild(fpsEl)}
-  fpsN++;if(n-fpsT>=1){fpsEl.textContent=Math.round(fpsN/(n-fpsT))+" fps";fpsN=0;fpsT=n}}
+  fpsN++;if(n-fpsT>=1){fpsEl.textContent=Math.round(fpsN/(n-fpsT))+" fps · max "+Math.round(fpsMax*1000)+" ms";fpsN=0;fpsT=n;fpsMax=0}}
 show(0);requestAnimationFrame(frame);
 
 /* ─── салют ─── */
