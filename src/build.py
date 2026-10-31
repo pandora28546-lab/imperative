@@ -58,6 +58,22 @@ if OUT=='game3':
   {title:"Звезда 2",items:[{k:"climb",name:"Залезай",make:makeCLIMB},{k:"down",name:"Слезай",make:makeDOWN},{k:"hide",name:"Прячься",make:makeHIDE},{k:"out",name:"Выходи",make:makeOUT}]},
   {title:"Звезда 3",items:[{k:"open",name:"Открой",make:makeOPEN},{k:"close",name:"Закрой",make:makeCLOSE},{k:"take",name:"Возьми",make:makeTAKE},{k:"give",name:"Дай",make:makeGIVE}]}];
 '''+eng[j:]
+    # звук как в финальном движке: blob-URL + два плеера, разблокировка тихим wav (iPad)
+    i=eng.index('var audio={};');j=eng.index('var UI=')
+    eng=eng[:i]+'''function toBlob(d){try{var b=atob(d.split(",")[1]),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return URL.createObjectURL(new Blob([u],{type:"audio/mpeg"}))}catch(e){return d}}
+var audio={};Object.keys(SND).forEach(function(k){audio[k]={run:toBlob(SND[k].run),fin:toBlob(SND[k].fin)}});
+var SILENT_WAV="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+var runEl=new Audio(),finEl=new Audio();[runEl,finEl].forEach(function(a){a.preload="auto"});
+var unlocked=false;
+function unlock(){if(unlocked)return;unlocked=true;[runEl,finEl].forEach(function(a){try{a.src=SILENT_WAV;var p=a.play();if(p&&p.then)p.then(function(){try{a.pause();a.currentTime=0}catch(e){}}).catch(function(){})}catch(e){}})}
+function cue(a,u){if(a.__u===u)return;try{a.pause();a.src=u;a.__u=u;a.load()}catch(e){}}
+function playM(a,u){cue(a,u);try{a.currentTime=0;a.muted=false}catch(e){}var p=a.play();if(p&&p.catch)p.catch(function(){})}
+function stopAll(){[runEl,finEl].forEach(function(a){if(a.__u)try{a.pause()}catch(e){}})}
+
+'''+eng[j:]
+    eng=rep(eng,'play(audio[sc.S.snd].run)','playM(runEl,audio[sc.S.snd].run)')
+    eng=rep(eng,'play(audio[S.snd].fin)','playM(finEl,audio[S.snd].fin)')
+    eng=rep(eng,'w.phase="wait";w.t0=clock;w.first=true;w.box.classList.add("on");','w.phase="wait";w.t0=clock;w.first=true;var su=sc.S.snd;setTimeout(function(){if(active===w&&w.scenes[w.cur].S.snd===su){cue(runEl,audio[su].run);cue(finEl,audio[su].fin)}},400);w.box.classList.add("on");')
 eng=rep(eng,'    w.scenes.push({svg:svg,S:S,hint:hint,waves:waves,vb:S.vb.split(" ").map(Number)});','    var vbA=S.vb.split(" ").map(Number);waves.forEach(function(c){c.setAttribute("r",f1(vbA[2]*.065))});\n    w.scenes.push({svg:svg,S:S,hint:hint,waves:waves,vb:vbA});')
 eng=rep(eng,'function still(sc){sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);sc.hint.setAttribute("opacity",0)}','function cam(sc){if(sc.S.cam){var v=sc.S.cam();sc.vb=v;sc.svg.setAttribute("viewBox",v.map(f1).join(" "))}}\nfunction still(sc){sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);cam(sc);sc.hint.setAttribute("opacity",0)}')
 eng=rep(eng,'    else if(w.phase==="fin"){S.fin(e,t,dt);if(e>2.2&&!w.box.classList.contains("done"))w.box.classList.add("done")}\n','    else if(w.phase==="fin"){S.fin(e,t,dt);if(e>2.2&&!w.box.classList.contains("done"))w.box.classList.add("done")}\n    cam(sc);\n')
