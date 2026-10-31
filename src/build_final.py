@@ -1,5 +1,7 @@
 import sys
 EXTRA=open('part_g2.js').read()
+ONLY=sys.argv[1] if len(sys.argv)>1 else None
+if ONLY=='3':EXTRA+=open('part_g3a.js').read()+open('part_g3b.js').read()+open('part_g3c.js').read()
 import re,base64,json
 def rep(s,x,y,n=1):
     assert s.count(x)==n,(x[:70],s.count(x)); return s.replace(x,y)
@@ -64,6 +66,9 @@ GAMES={
  1:('Повелительное наклонение · движения',[[('leti','makeFLY'),('prygai','makeJUMP'),('plyvi','makeSWIM'),('begi','makeBEGI')],
      [('polzi','makeCRAWL'),('skachi','makeGALLOP'),('idi','makeWALK'),('tancui','makeDANCE')],
      [('kachaisya','makeSWING'),('syad','makeSIT'),('lyag','makeLIE'),('vstan','makeSTAND')]]),
+ 3:('Повелительное наклонение · действия и пары',[[('hlopai','makeCLAP'),('poi','makeSING'),('risui','makeDRAW'),('spi','makeSLEEP')],
+     [('zalezai','makeCLIMB'),('slezai','makeDOWN'),('pryachsya','makeHIDE'),('vyhodi','makeOUT')],
+     [('otkroi','makeOPEN'),('zakroi','makeCLOSE'),('vozmi','makeTAKE'),('dai','makeGIVE')]]),
  2:('Повелительное наклонение · действия с предметом',[[('nesi','makeCARRY'),('lovi','makeCATCH'),('kopai','makeDIG'),('tyani','makePULL')],
      [('kati','makeROLL'),('moi','makeWASH'),('bros','makeTHROW'),('stuchi','makeKNOCK')],
      [('esh','makeEAT'),('pei','makeDRINK'),('dui','makeBLOW'),('polivai','makeWATER')]]),
@@ -73,6 +78,7 @@ shell=open('part_final_shell.html').read()
 import os
 os.makedirs('final',exist_ok=True)
 for g,(title,seq) in GAMES.items():
+    if ONLY and str(g)!=ONLY:continue
     seqjs='['+','.join('['+','.join('{v:"%s",make:%s}'%(v,m) for v,m in st)+']' for st in seq)+']'
     eng=eng0.replace('__SEQ__',seqjs)
     js='/* Повелительное наклонение — игра %d. Сцены + движок. */\n(function(){\n"use strict";\nif(!document.getElementById("gdefs")){var d=document.createElement("div");d.innerHTML=%s;document.body.appendChild(d.firstChild)}\nvar NS="http://www.w3.org/2000/svg",DEFS=document.getElementById("gdefs");\n'%(g,json.dumps(defs))+lib+'\n'+sc+'\n'+new+'\n'+s3+'\n'+eng+'\n})();\n'
