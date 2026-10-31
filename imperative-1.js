@@ -1566,7 +1566,7 @@ function show(i){buildScene(i);var warm=warmIdx===i;scenes.forEach(function(sc,k
 var warmIdx=-1;
 function prewarm(){var k=idx+1;if(k>=ITEMS.length||warmIdx===k)return;var sc=buildScene(k);still(sc);sc.svg.style.zIndex=0;sc.svg.style.display="";warmIdx=k}
 function hideHint(){cur().hint.setAttribute("opacity",0);hintAt=1e9}
-function showBtns(on){game.classList.toggle("sg-btns",on);if(on)prewarm()}
+function showBtns(on){game.classList.toggle("sg-btns",on)}
 
 /* сцена: (первая) «Повтори» → команда → подсказка; остальные: команда → подсказка через 3 с */
 function startScene(isFirst){var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
@@ -1604,8 +1604,12 @@ function restart(){$id("sg-end-overlay").classList.remove("sg-show");stopFirewor
 
 /* ─── кнопки ─── */
 $id("sg-again").addEventListener("click",function(){if(stageBusy)return;startScene(false)});
-/* «Дальше»: следующая сцена уже отрисована под текущей (prewarm), поэтому смена — просто перестановка слоёв, без первой отрисовки */
-$id("sg-go").addEventListener("click",function(){if(stageBusy)return;if(idx>=ITEMS.length-1)return;showBtns(false);show(idx+1);startScene(false)});
+/* «Дальше»: текущая сцена замирает на последнем кадре, а следующая в это время отрисовывается под ней (prewarm).
+   Тяжёлая первая отрисовка приходится на неподвижную картинку, поэтому рывка не видно. Через 2 кадра слои меняются местами. */
+var frozen=false;
+$id("sg-go").addEventListener("click",function(){if(stageBusy||frozen)return;if(idx>=ITEMS.length-1)return;showBtns(false);var n=idx+1;
+  frozen=true;prewarm();
+  requestAnimationFrame(function(){requestAnimationFrame(function(){show(n);frozen=false;startScene(false)})})});
 $id("sg-repeat").addEventListener("click",function(){if(!started||(phase!=="voice"&&phase!=="ready"))return;var sc=cur(),my=++sceneToken;hideHint();phase="voice";
   playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+HINT_NEXT})});
 $id("sg-music").addEventListener("click",function(){musicOn=!musicOn;this.classList.toggle("sg-off",!musicOn);[runEl,finEl].forEach(function(a){a.muted=!musicOn})});
@@ -1618,7 +1622,8 @@ document.addEventListener("visibilitychange",function(){if(document.hidden)pause
 
 /* ─── кадр ─── */
 function frame(){var n=performance.now()/1000,full=Math.min(.5,n-last);last=n;if(FPS){if(full>fpsMax)fpsMax=full;fpsTick(n)}
-  if(!started){requestAnimationFrame(frame);return}   /* до старта сцена стоит: не мешаем лоадеру и размытию стартового экрана */
+  if(!started){requestAnimationFrame(frame);return}
+  if(frozen){requestAnimationFrame(frame);return}   /* пока под сценой рисуется следующая — кадр стоит */   /* до старта сцена стоит: не мешаем лоадеру и размытию стартового экрана */
   var steps=Math.max(1,Math.ceil(full/.034)),h=full/steps;
   for(var st=0;st<steps;st++)step(h);cam(cur());requestAnimationFrame(frame)}
 function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
