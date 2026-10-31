@@ -3,6 +3,9 @@ ENGINE='part_engine.js';EXTRA='';OUT='all'
 if len(sys.argv)>1 and sys.argv[1]=='g2':
     ENGINE='part_engine2.js';EXTRA=open('part_g2.js').read();OUT='game2'
     KEYS={k:k for k in ['dig','catch','carry','pull','roll','wash','throw','knock','eat','drink','blow','water']}
+if len(sys.argv)>1 and sys.argv[1]=='g3':
+    ENGINE='part_engine2.js';EXTRA=open('part_g2.js').read()+open('part_g3a.js').read()+open('part_g3b.js').read()+open('part_g3c.js').read();OUT='game3'
+    KEYS={k:k for k in ['clap','sing','draw','sleep','climb','down','hide','out','open','close','take','give']}
 import re,base64,json
 def rep(s,x,y,n=1):
     assert s.count(x)==n,(x[:70],s.count(x)); return s.replace(x,y)
@@ -48,6 +51,13 @@ new=rep(new,'tr(cat,"translate(0 40)");','tr(cat,"translate(0 70)");')
 new=rep(new,'tr(cat,"translate(0 "+f1(40-40*(1-Math.pow(1-c,3)))+")");','tr(cat,"translate(0 "+f1(70-70*(1-Math.pow(1-c,3)))+")");')
 new=rep(new,'var mid=el("g",{},R);for(i=0;i<12;i++){','var mid=el("g",{},R);for(i=0;i<12;i++){')
 eng=open(ENGINE).read()
+if OUT=='game3':
+    i=eng.index('var WINS=[');j=eng.index('var SND=')
+    eng=eng[:i]+'''var WINS=[
+  {title:"Звезда 1",items:[{k:"clap",name:"Хлопай",make:makeCLAP},{k:"sing",name:"Пой",make:makeSING},{k:"draw",name:"Рисуй",make:makeDRAW},{k:"sleep",name:"Спи",make:makeSLEEP}]},
+  {title:"Звезда 2",items:[{k:"climb",name:"Залезай",make:makeCLIMB},{k:"down",name:"Слезай",make:makeDOWN},{k:"hide",name:"Прячься",make:makeHIDE},{k:"out",name:"Выходи",make:makeOUT}]},
+  {title:"Звезда 3",items:[{k:"open",name:"Открой",make:makeOPEN},{k:"close",name:"Закрой",make:makeCLOSE},{k:"take",name:"Возьми",make:makeTAKE},{k:"give",name:"Дай",make:makeGIVE}]}];
+'''+eng[j:]
 eng=rep(eng,'    w.scenes.push({svg:svg,S:S,hint:hint,waves:waves,vb:S.vb.split(" ").map(Number)});','    var vbA=S.vb.split(" ").map(Number);waves.forEach(function(c){c.setAttribute("r",f1(vbA[2]*.065))});\n    w.scenes.push({svg:svg,S:S,hint:hint,waves:waves,vb:vbA});')
 eng=rep(eng,'function still(sc){sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);sc.hint.setAttribute("opacity",0)}','function cam(sc){if(sc.S.cam){var v=sc.S.cam();sc.vb=v;sc.svg.setAttribute("viewBox",v.map(f1).join(" "))}}\nfunction still(sc){sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);cam(sc);sc.hint.setAttribute("opacity",0)}')
 eng=rep(eng,'    else if(w.phase==="fin"){S.fin(e,t,dt);if(e>2.2&&!w.box.classList.contains("done"))w.box.classList.add("done")}\n','    else if(w.phase==="fin"){S.fin(e,t,dt);if(e>2.2&&!w.box.classList.contains("done"))w.box.classList.add("done")}\n    cam(sc);\n')
