@@ -1541,7 +1541,10 @@ function playSpeech(url,onDone){stopSpeech();var my=speechSeq;
   function finish(){if(my!==speechSeq)return;speechSeq++;if(speechTimer){clearTimeout(speechTimer);speechTimer=null}if(onDone)onDone()}
   speechEl.onended=function(){speechEl.onended=null;speechEl.onerror=null;finish()};speechEl.onerror=function(){speechEl.onended=null;speechEl.onerror=null;finish()};
   speechTimer=setTimeout(finish,8000);try{speechEl.src=srcFor(url);speechEl.currentTime=0}catch(e){}var p=speechEl.play();if(p&&p.catch)p.catch(function(){finish()})}
-function playMusic(a,url){try{a.pause();a.src=srcFor(url);a.currentTime=0;a.muted=!musicOn}catch(e){}var p=a.play();if(p&&p.catch)p.catch(function(){})}
+/* музыку сцены грузим в плеер заранее (cueMusic при старте сцены): на iPad смена src блокирует страницу на 0,2–0,8 с,
+   и если делать это в момент тапа, анимация стартует с рывка */
+function cueMusic(a,url){var u=srcFor(url);if(a.__u===u)return;try{a.pause();a.src=u;a.__u=u;a.load()}catch(e){}}
+function playMusic(a,url){cueMusic(a,url);try{a.currentTime=0;a.muted=!musicOn}catch(e){}var p=a.play();if(p&&p.catch)p.catch(function(){})}
 function stopMusic(){[runEl,finEl].forEach(function(a){try{a.pause()}catch(e){}})}
 function playFx(f){try{fxEl.src=srcFor(DBASE+encodeURIComponent(f));fxEl.currentTime=0}catch(e){}var p=fxEl.play();if(p&&p.catch)p.catch(function(){})}
 
@@ -1569,7 +1572,7 @@ function hideHint(){cur().hint.setAttribute("opacity",0);hintAt=1e9}
 function showBtns(on){game.classList.toggle("sg-btns",on);if(on)mark("кнопки")}
 
 /* сцена: (первая) «Повтори» → команда → подсказка; остальные: команда → подсказка через 3 с */
-function startScene(isFirst){mark("старт сцены");var sc=cur();stopSpeech();stopMusic();showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
+function startScene(isFirst){mark("старт сцены");var sc=cur();stopSpeech();stopMusic();cueMusic(runEl,goURL(sc.v));cueMusic(finEl,finURL(sc.v));showBtns(false);sc.S.reset();cam(sc);hideHint();phase="voice";t0=clock;
   var my=++sceneToken;
     setTimeout(function(){if(my!==sceneToken||phase!=="voice")return;
     var cmd=function(){if(my!==sceneToken||phase!=="voice")return;playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+(isFirst?HINT_FIRST:HINT_NEXT)})};
