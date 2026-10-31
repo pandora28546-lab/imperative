@@ -85,6 +85,8 @@ snd={k:{'run':'__A_run_'+f+'__','fin':'__A_fin_'+f+'__'} for k,f in keys.items()
 eng=eng.replace('__SND__',json.dumps(snd))
 js='(function(){\n"use strict";\nvar NS="http://www.w3.org/2000/svg",DEFS=document.getElementById("gdefs");\n'+lib+'\n'+sc+'\n'+new+'\n'+s3+'\n'+eng+'\n})();'
 t=head+'\n<script>\n'+js+'\n</script>\n'
+if OUT=='game3':
+    t=t.replace('<title>Повелительное наклонение</title>','<title>Повелительное наклонение 3</title>',1)
 open(OUT+'_t.html','w').write(t)
 for m in set(re.findall(r'__A_(\w+?)__',t)):
     t=t.replace('__A_'+m+'__','data:audio/mpeg;base64,'+base64.b64encode(open('snd/'+m+'.mp3','rb').read()).decode())
