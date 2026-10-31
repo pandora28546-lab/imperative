@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>__TITLE__</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+
+#sofia-game {
+  font-family: 'Nunito', Arial, sans-serif;
+  background: #EAF1FF;
+  color: #2B3A5C;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  aspect-ratio: 2048 / 1368;        /* всегда горизонтально 3:2 */
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 16px 60px rgba(0,0,0,.25), 0 4px 16px rgba(0,0,0,.15);
+  container-type: inline-size;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+#sofia-game *, #sofia-game *::before, #sofia-game *::after { box-sizing: border-box; margin: 0; padding: 0; }
+#sofia-game.sg-portrait { aspect-ratio: 3 / 5; }   /* телефон в портрете до старта — как первая игра */
+
+#sg-scene {
+  position: absolute; inset: 0; border-radius: 24px; overflow: hidden;
+  background: #cdd9e6; background-size: cover; background-position: center;
+}
+
+/* ─── СОНАР-ПОДСКАЗКА (вариант A) ─── */
+#sofia-game .sg-hint { position: absolute; transform: translate(-50%,-50%); width: 13%; aspect-ratio: 1/1; pointer-events: none; z-index: 30; display: none; }
+#sofia-game .sg-hint.sg-on { display: block; }
+#sofia-game .sg-wave { position: absolute; inset: 0; border-radius: 50%; border: 4px solid #6B91D6; opacity: 0; animation: sg-sonar 3.6s ease-out infinite; }
+#sofia-game .sg-wave:nth-child(2){ animation-delay: 1.2s; }
+#sofia-game .sg-wave:nth-child(3){ animation-delay: 2.4s; }
+@keyframes sg-sonar { 0%{ transform: scale(.5); opacity:.8 } 100%{ transform: scale(1.8); opacity:0 } }
+
+/* ─── короткое кольцо при верном тапе ─── */
+#sofia-game .sg-pop { position: absolute; transform: translate(-50%,-50%); width: 13%; aspect-ratio: 1/1; border-radius: 50%; border: 5px solid #5BAD7A; pointer-events: none; z-index: 31; animation: sg-pop .6s ease-out forwards; }
+@keyframes sg-pop { 0%{ transform: translate(-50%,-50%) scale(.4); opacity:1 } 100%{ transform: translate(-50%,-50%) scale(1.45); opacity:0 } }
+
+/* звёзды-этапы — ТРИ */
+#sofia-game .sg-stars { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 12; }
+#sofia-game .sg-starback { width: 32px; height: 32px; border-radius: 50%; background: #6B91D6; box-shadow: 0 2px 6px rgba(0,0,0,.15); display: flex; align-items: center; justify-content: center; }
+#sofia-game .sg-starsvg { width: 78%; height: 78%; display: block; background: #D3E2FF; -webkit-mask: var(--sg-star-mask) center / contain no-repeat; mask: var(--sg-star-mask) center / contain no-repeat; }
+#sofia-game .sg-starsym { width: 78%; height: 78%; object-fit: contain; display: none; }
+/* оптический сдвиг вверх: центр масс звезды ниже геометрического центра */
+#sofia-game .sg-starsym,
+#sofia-game .sg-starsvg { transform: translateY(-4.5%); }
+#sofia-game .sg-starback.sg-earned .sg-starsvg { display: none; }
+#sofia-game .sg-starback.sg-earned .sg-starsym { display: block; }
+#sofia-game .sg-starback.sg-pulse { animation: sg-starpulse .6s ease; }
+
+/* большая звезда */
+#sg-bigstar { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(0); width: 28%; max-width: 180px; z-index: 105; display: none; pointer-events: none; }
+#sg-bigstar img { width: 100%; display: block; }
+
+/* круглые кнопки: 🔊 повтор слева, 🎶 музыка справа, ⛶ фулскрин рядом с музыкой */
+#sofia-game .sg-cbtn { position: absolute; top: 12px; z-index: 12; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.92); border: 2px solid #6B91D6; font-size: 17px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; -webkit-tap-highlight-color: transparent; }
+#sg-repeat { left: 14px; }
+#sg-fs     { right: 56px; }
+#sg-music  { right: 14px; }
+#sofia-game .sg-cbtn.sg-off { opacity: .45; }
+
+/* финал */
+#sg-end-overlay { position: absolute; inset: 0; border-radius: 24px; background: rgba(107,145,214,.30); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 120; }
+#sg-end-overlay.sg-show { display: flex; }
+#sg-end-overlay .sg-end-box { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 26px; }
+#sg-nextbtn { width: 88px; height: 88px; }
+#sg-nextbtn .sg-blob-icon { width: 40px; height: 40px; }
+#sg-endbtn { width: 70px; height: 70px; }
+#sg-endbtn .sg-blob-icon { width: 31px; height: 31px; }
+
+/* загрузка / старт */
+#sg-loading { position: absolute; inset: 0; background: #EAF1FF; z-index: 150; border-radius: 24px; overflow: hidden; }
+/* ── экран загрузки: собака-сёрфер (ассеты jsDelivr, репо Web) ── */
+#uzor-loader{ position:absolute; inset:0; width:100%; height:100%; }
+#uzor-loader .ul-scene{ position:absolute; inset:0; overflow:hidden; background-size:cover; background-position:center; background-repeat:no-repeat; }
+#uzor-loader .ul-bar{ position:absolute; background:#D2E2FE; border-radius:999px; overflow:hidden; }
+#uzor-loader .ul-fill{ position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#6B91D6,#A9C2EF); border-radius:999px; }
+#uzor-loader .ul-dog{ position:absolute; width:auto; will-change:transform,left,top; filter:drop-shadow(0 6px 6px rgba(44,58,94,.18)); }
+#uzor-loader .ul-cap{ position:absolute; left:50%; transform:translate(-50%,-50%); font-family:'Nunito',sans-serif; font-weight:700; color:#2D3A5C; white-space:nowrap; }
+#sg-start-overlay { position: absolute; inset: 0; border-radius: 24px; background: rgba(107,145,214,.38); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 200; }
+/* ── кнопки-кляксы (общие стили) ── */
+#sofia-game .sg-blob { position: relative; display: flex; align-items: center; justify-content: center; border: none; background: none; padding: 0; min-width: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; animation: none; }
+#sofia-game .sg-blob:active { filter: brightness(.96); }
+#sofia-game .sg-blob .sg-blob-bg { position: absolute; inset: 0; border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%; animation: sg-morph 7s ease-in-out infinite; }
+#sofia-game .sg-blob-orange .sg-blob-bg { background: #F97A4F; box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+#sofia-game .sg-blob-glass .sg-blob-bg { background: rgba(255,255,255,.16); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); border: 2px solid rgba(255,255,255,.6); box-shadow: 0 8px 22px rgba(0,0,0,.16), inset 0 3px 10px rgba(255,255,255,.4); }
+#sofia-game .sg-blob-glass.sg-blob-delay .sg-blob-bg { animation-duration: 8s; animation-delay: -2.6s; }
+#sofia-game .sg-blob-icon { position: relative; z-index: 2; }
+#sofia-game .sg-blob-icon * { stroke: #fff; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+#sofia-game .sg-blob-icon.sg-play path { fill: #fff; stroke: #fff; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+@keyframes sg-morph {
+  0%,100% { border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%; transform: scale(1); }
+  33%     { border-radius: 60% 40% 42% 58% / 55% 58% 42% 45%; transform: scale(1.02); }
+  66%     { border-radius: 38% 62% 55% 45% / 60% 42% 58% 40%; transform: scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce){ #sofia-game .sg-blob .sg-blob-bg { animation: none !important; } }
+
+/* размер стартовой кнопки */
+#sofia-game #sg-start-btn { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 88px; height: 88px; }
+#sg-start-cap { position: absolute; left: 50%; top: 62%; transform: translate(-50%,-50%); width: 86%; text-align: center; color: #fff; font-weight: 700; font-size: 15px; text-shadow: 0 1px 4px rgba(0,0,0,.55); }
+#sg-start-btn .sg-blob-icon { width: 38px; height: 38px; }
+
+#sg-fireworks { position: absolute; inset: 0; pointer-events: none; z-index: 99; width: 100%; height: 100%; }
+
+@keyframes sg-start-pulse { 0%,100%{ transform:scale(1); box-shadow:0 6px 28px rgba(249,122,79,.4);} 50%{ transform:scale(1.07); box-shadow:0 10px 40px rgba(249,122,79,.65);} }
+@keyframes sg-starpulse  { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.5);} }
+
+/* ── полноэкранный режим ── */
+#sg-fs-wrap { position: relative; }
+#sg-fs-wrap.sg-pseudo-fs,
+#sg-fs-wrap:fullscreen,
+#sg-fs-wrap:-webkit-full-screen {
+  position: fixed; inset: 0; z-index: 99999; margin: 0;
+  height: 100vh; height: 100dvh;
+  padding: env(safe-area-inset-top) max(env(safe-area-inset-left), env(safe-area-inset-right)) env(safe-area-inset-bottom) max(env(safe-area-inset-left), env(safe-area-inset-right));
+  background-color: #EAF1FF;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* размытая подложка — отдельный слой ПОЗАДИ поля */
+#sg-fs-wrap.sg-pseudo-fs::before,
+#sg-fs-wrap:fullscreen::before,
+#sg-fs-wrap:-webkit-full-screen::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: var(--sg-fsbg);
+  background-size: cover; background-position: center;
+  filter: blur(34px) brightness(.9);
+  transform: scale(1.2);
+}
+#sg-fs-wrap.sg-pseudo-fs #sofia-game,
+#sg-fs-wrap:fullscreen #sofia-game,
+#sg-fs-wrap:-webkit-full-screen #sofia-game {
+  position: relative; z-index: 1;
+  height: auto; max-width: none; aspect-ratio: 2048 / 1368; border-radius: 24px;
+  width: min(96vw, calc(96vh * 2048 / 1368));
+  width: min(96vw, calc(96dvh * 2048 / 1368));
+}
+
+#sg-rotate {
+  position: absolute; inset: 0; z-index: 50; display: none;
+  flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  border-radius: 24px; overflow: hidden;
+  background: rgba(234,241,255,.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  color: #2B3A5C; text-align: center; font-family: 'Nunito', Arial, sans-serif;
+}
+#sg-rotate.sg-show { display: flex; }
+#sg-rotate .sg-rot-emoji { font-size: 76px; line-height: 1; animation: sg-rotate-hint 2.4s ease-in-out infinite; }
+#sg-rotate .sg-rot-text  { font-size: 22px; font-weight: 800; }
+#sg-rotate #sg-rot-x { display: none; }
+@keyframes sg-rotate-hint { 0%,18%{ transform: rotate(0deg);} 48%,70%{ transform: rotate(90deg);} 100%{ transform: rotate(0deg);} }
+
+/* ─── сцены-анимации ─── */
+#sg-stage { position: absolute; inset: 0; border-radius: 24px; overflow: hidden; background: #EAF1FF; touch-action: manipulation; }
+#sg-stage .sg-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; will-change: transform; }
+/* в полноэкранном режиме тень не нужна — в Safari она давала артефакт в углу */
+#sg-fs-wrap.sg-pseudo-fs #sofia-game,
+#sg-fs-wrap:fullscreen #sofia-game,
+#sg-fs-wrap:-webkit-full-screen #sofia-game { box-shadow: none; }
+#sg-bigstar { will-change: transform; }
+#sg-veil { position: absolute; inset: 0; z-index: 5; background: #EAF1FF; opacity: 0; pointer-events: none; transition: opacity .25s ease; will-change: opacity; }
+#sg-veil.on { opacity: 1; pointer-events: auto; }
+/* после каждой сцены: стеклянные кляксы по центру, без размытия */
+#sg-scene-end { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; gap: 3.2cqw; }
+#sofia-game.sg-btns #sg-scene-end { display: flex; }
+#sg-again { width: 8.5cqw; height: 8.5cqw; }
+#sg-again .sg-blob-icon { width: 45%; height: 45%; }
+#sg-go { width: 10.7cqw; height: 10.7cqw; }
+#sg-go .sg-blob-icon { width: 46%; height: 46%; }
+#sg-scene-end .sg-blob-glass .sg-blob-bg { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.75); }
+#sofia-game button:focus-visible { outline: 3px solid #F97A4F; outline-offset: 3px; }
+</style>
+</head>
+<body style="margin:0;padding:20px;background:#f0f0f0;">
+
+<div id="sg-fs-wrap">
+<div id="sofia-game">
+  <canvas id="sg-fireworks"></canvas>
+
+  <div id="sg-stage"></div>
+
+  <div class="sg-stars">
+    <div class="sg-starback"><span class="sg-starsvg"></span><img class="sg-starsym" alt=""></div>
+    <div class="sg-starback"><span class="sg-starsvg"></span><img class="sg-starsym" alt=""></div>
+    <div class="sg-starback"><span class="sg-starsvg"></span><img class="sg-starsym" alt=""></div>
+  </div>
+
+  <button class="sg-cbtn" id="sg-repeat" title="Повторить">🔊</button>
+  <button class="sg-cbtn" id="sg-fs" title="Полный экран"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2B3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14,4 20,4 20,10"/><line x1="20" y1="4" x2="13.5" y2="10.5"/><polyline points="10,20 4,20 4,14"/><line x1="4" y1="20" x2="10.5" y2="13.5"/></svg></button>
+  <button class="sg-cbtn" id="sg-music" title="Музыка">🎶</button>
+
+  <div id="sg-scene-end">
+    <button id="sg-again" class="sg-blob sg-blob-glass sg-blob-delay" aria-label="Ещё раз">
+      <span class="sg-blob-bg"></span>
+      <svg class="sg-blob-icon" viewBox="0 0 24 24" fill="none"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><polyline points="17.6 2.8 17.6 7 13.4 7"/></svg>
+    </button>
+    <button id="sg-go" class="sg-blob sg-blob-glass" aria-label="Дальше">
+      <span class="sg-blob-bg"></span>
+      <svg class="sg-blob-icon" viewBox="0 0 24 24" fill="none"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="13,6 20,12 13,18"/></svg>
+    </button>
+  </div>
+
+  <div id="sg-bigstar"><img id="sg-bigstar-img" alt=""></div>
+
+  <div id="sg-end-overlay">
+    <div class="sg-end-box">
+      <button id="sg-endbtn" class="sg-blob sg-blob-glass sg-blob-delay" aria-label="Пройти заново">
+        <span class="sg-blob-bg"></span>
+        <svg class="sg-blob-icon" viewBox="0 0 24 24" fill="none"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><polyline points="17.6 2.8 17.6 7 13.4 7"/></svg>
+      </button>
+      <button id="sg-nextbtn" class="sg-blob sg-blob-orange" aria-label="Играть дальше">
+        <span class="sg-blob-bg"></span>
+        <svg class="sg-blob-icon" viewBox="0 0 24 24" fill="none"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="13,6 20,12 13,18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="sg-loading">
+    <div id="uzor-loader"><div class="ul-scene"></div></div>
+  </div>
+
+  <div id="sg-start-overlay" style="display:none">
+    <button id="sg-start-btn" class="sg-blob sg-blob-orange" aria-label="Начать">
+      <span class="sg-blob-bg"></span>
+      <svg class="sg-blob-icon sg-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div id="sg-start-cap">🔊 Включите звук на устройстве</div>
+  </div>
+</div><!-- /#sofia-game -->
+
+  <div id="sg-rotate">
+    <button id="sg-rot-x" title="Закрыть"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2B3A5C" stroke-width="3" stroke-linecap="round"><line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/><line x1="17.5" y1="6.5" x2="6.5" y2="17.5"/></svg></button>
+    <div class="sg-rot-emoji">📱</div>
+    <div class="sg-rot-text">Поверни телефон</div>
+  </div>
+</div><!-- /#sg-fs-wrap -->
+
+<script>
+/* pokazhi: до инициализации лоадера ставим вертикальную карточку на телефоне в портрете,
+   чтобы лоадер сразу рисовался вертикально — без мелькания горизонтального кадра */
+(function(){
+  var g=document.getElementById('sofia-game');
+  if(!g) return;
+  var phone = Math.min(window.screen.width, window.screen.height) < 480;
+  var landscape = window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
+  if(phone && !landscape) g.classList.add('sg-portrait');
+})();
+</script>
+
+<script>
+/* ===== Экран загрузки: собака-сёрфер (адаптивный) ===== */
+(function(){
+  var REPO="https://cdn.jsdelivr.net/gh/pandora28546-lab/Web@main/";
+  var DOG = REPO+"89-1.png";
+  var BG  = { landscape: REPO+"IMG_1907.jpeg", portrait: REPO+"IMG_1908.jpeg" };
+
+  var CFG = {
+    landscape:{ barL:16, barR:84, barY:47, barH:3,   dogH:36, startX:26, endX:78, textY:66, dogRide:0.21, dur:4500, textK:0.025 },
+    portrait: { barL:14, barR:86, barY:45, barH:1.9, dogH:23, startX:28, endX:72, textY:57, dogRide:0.21, dur:4500, textK:0.025 }
+  };
+  var HOLD_END=900, HOLD_START=450, LOOP=true;
+
+  var scene=document.querySelector('#uzor-loader .ul-scene');
+  if(!scene) return;
+  var root=document.getElementById('uzor-loader');
+  var bar=document.createElement('div'); bar.className='ul-bar';
+  var fill=document.createElement('div'); fill.className='ul-fill'; bar.appendChild(fill);
+  var dog=document.createElement('img'); dog.className='ul-dog'; dog.alt='собака-сёрфер'; try{dog.fetchPriority='high';}catch(e){} dog.src=DOG;
+  var cap=document.createElement('div'); cap.className='ul-cap'; cap.textContent='Секунду, игра загружается';
+  scene.appendChild(bar); scene.appendChild(dog); scene.appendChild(cap);
+
+  // картинки экрана загрузки — в первую очередь; собаку показываем только когда она
+  // полностью декодирована, чтобы не появлялась «кусками»
+  var dogReady=false;
+  (function(){ function ok(){ dogReady=true; }
+    if(dog.decode){ dog.decode().then(ok).catch(ok); }
+    else { dog.onload=ok; if(dog.complete) ok(); } })();
+  [BG.landscape, BG.portrait].forEach(function(u){ try{ var p=new Image(); p.fetchPriority='high'; p.src=u; }catch(e){ var q=new Image(); q.src=u; } });
+  function setSceneBg(url){ var im=new Image(); function done(){ scene.style.backgroundImage='url("'+url+'")'; } im.onload=done; im.onerror=done; im.src=url; }
+
+  var c, mode=null, curX=null;
+  function pickMode(){ return scene.clientWidth>=scene.clientHeight ? 'landscape' : 'portrait'; }
+
+  function drawAt(x,rot,bob){
+    var y=c.barY - c.dogRide*c.dogH + bob;
+    dog.style.cssText='position:absolute;width:auto;height:'+c.dogH+'%;left:'+x+'%;top:'+y+'%;'+
+      'transform:translate(-50%,-50%) rotate('+rot.toFixed(2)+'deg);'+
+      'filter:drop-shadow(0 6px 6px rgba(44,58,94,.18));'+
+      'opacity:'+(dogReady?'1':'0')+';transition:opacity .3s ease;';
+    var f=(x-c.barL)/(c.barR-c.barL); f=Math.max(0,Math.min(1,f)); fill.style.width=(f*100).toFixed(1)+'%';
+  }
+
+  /* ── подписи «загрузки» и «старта» совпадают по размеру и уровню ──
+     считаем от размера карточки (а не сцены), чтобы работало и после скрытия загрузки */
+  var GAME=document.getElementById('sofia-game');
+  function syncScreens(){
+    if(!GAME) return;
+    var W=GAME.clientWidth, H=GAME.clientHeight;
+    if(!W) return;
+    var land = W>=H;                                    // 3:2 = landscape, 3:5 = portrait
+    var ty=(land?CFG.landscape:CFG.portrait).textY;
+    var by=(land?CFG.landscape:CFG.portrait).barY;
+    var capPx=Math.max(16, W*0.025);
+    cap.style.top=ty+'%'; cap.style.fontSize=capPx+'px';
+    var scap=document.getElementById('sg-start-cap');
+    if(scap){ scap.style.top=ty+'%'; scap.style.fontSize=capPx+'px'; }
+    var bs=Math.min(132, Math.max(92, W*0.15));   // размер оранжевой кнопки: старт == финал
+    var sbtn=document.getElementById('sg-start-btn');
+    if(sbtn){
+      sbtn.style.width=bs+'px'; sbtn.style.height=bs+'px';
+      var ic=sbtn.querySelector('.sg-blob-icon');
+      if(ic){ var is=Math.round(bs*0.42); ic.style.width=is+'px'; ic.style.height=is+'px'; }
+      sbtn.style.top=(by-2)+'%';                         // кнопка на уровне бара, чуть выше подписи
+    }
+    var nbtn=document.getElementById('sg-nextbtn');   // финальная оранжевая — того же размера
+    if(nbtn){
+      nbtn.style.width=bs+'px'; nbtn.style.height=bs+'px';
+      var nic=nbtn.querySelector('.sg-blob-icon');
+      if(nic){ var nis=Math.round(bs*0.45); nic.style.width=nis+'px'; nic.style.height=nis+'px'; }
+    }
+    var ebtn=document.getElementById('sg-endbtn');    // стеклянная — соразмерно (≈0.8 от оранжевой)
+    if(ebtn){
+      var es=Math.round(bs*0.795);
+      ebtn.style.width=es+'px'; ebtn.style.height=es+'px';
+      var eic=ebtn.querySelector('.sg-blob-icon');
+      if(eic){ var eis=Math.round(es*0.44); eic.style.width=eis+'px'; eic.style.height=eis+'px'; }
+    }
+  }
+
+  function applyLayout(){
+    var m=pickMode();
+    if(m!==mode){ mode=m; c=CFG[m]; setSceneBg(BG[m]); }
+    bar.style.cssText='position:absolute;left:'+c.barL+'%;right:'+(100-c.barR)+'%;top:'+c.barY+'%;'+
+      'height:'+c.barH+'%;transform:translateY(-50%);background:#D2E2FE;border-radius:999px;overflow:hidden;';
+    drawAt(curX==null?c.startX:curX,0,0);
+    syncScreens();
+  }
+
+  /* ── прогресс собачки привязан к реальной загрузке игры ── */
+  var realProg=0, shownProg=0, finishing=false, finishCb=null, doneCalled=false;
+  window.__uzorProgress=function(f){ if(f>realProg) realProg=Math.min(1,f); };
+  window.__uzorFinish  =function(cb){ finishing=true; finishCb=cb||null; realProg=1; };
+  function fire(){ if(!doneCalled){ doneCalled=true; if(finishCb) finishCb(); } }
+
+  var t0=null;
+  function loop(ts){
+    if(root.offsetParent===null){ if(finishing) fire(); return; }   // загрузка скрыта — стоп
+    if(t0===null)t0=ts;
+    var t=(ts-t0)/1000;
+    var step=(realProg-shownProg)*0.14;
+    if(realProg>shownProg && step<0.006) step=0.006;   // чтобы не «ползла» слишком медленно
+    shownProg+=step; if(shownProg>realProg) shownProg=realProg; if(shownProg>1) shownProg=1;
+    curX=c.startX+(c.endX-c.startX)*shownProg;
+    var s=Math.sin(t*Math.PI*2*1.6);                   // лёгкое покачивание на волне
+    drawAt(curX, s*2.0, s*0.7);
+    if(finishing && shownProg>=0.999){ fire(); return; }   // доплыла до конца → показываем старт
+    requestAnimationFrame(loop);
+  }
+
+  applyLayout(); curX=c.startX; drawAt(curX,0,0);
+  requestAnimationFrame(loop);
+  window.addEventListener('resize', applyLayout);
+  /* pokazhi: карточка меняет пропорции классом sg-portrait (не вызывает resize) —
+     следим за реальным размером карточки, чтобы пересчитать раскладку лоадера и старт-экрана */
+  if(window.ResizeObserver && GAME){ try{ new ResizeObserver(function(){ applyLayout(); }).observe(GAME); }catch(e){} }
+})();
+</script>
+
+<script>
+/* ◀──────── ССЫЛКА НА СЛЕДУЮЩУЮ ИГРУ ────────▶ */
+window.SG_CFG = { next: 'https://sofiatmn.ru/' };
+</script>
+<script src="__JS__"></script>
+</body>
+</html>

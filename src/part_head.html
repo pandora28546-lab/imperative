@@ -1,0 +1,88 @@
+<title>Повелительное наклонение</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap">
+<style>
+/* Layout: two real game windows stacked (star 1 above star 2); each has a verb switcher above it. */
+:root{--ink:#2B3A5C;--blue:#6B91D6;--page:#F0F0F0;--font:"Nunito",Arial,sans-serif;color-scheme:light}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font)}
+body{padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-tap-highlight-color:transparent}
+body.fs-open{overflow:hidden}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font:900 22px/1.2 var(--font);margin:0;text-wrap:balance}
+.board{display:flex;flex-direction:column;gap:34px}
+.win{width:min(820px,100%);margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.rowh{font:800 14px/1 var(--font);color:var(--blue);letter-spacing:.04em;text-transform:uppercase;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:5px;border-radius:999px;background:#FFFFFF;box-shadow:0 2px 10px rgba(44,58,92,.08)}
+.chip{font:800 15px/1 var(--font);color:var(--blue);background:transparent;border:0;border-radius:999px;padding:10px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.chip[aria-pressed="true"]{background:var(--blue);color:#fff}
+.chip:focus-visible{outline:3px solid #F97A4F;outline-offset:2px}
+.sg{container-type:inline-size;position:relative;width:100%;aspect-ratio:2048/1368;border-radius:24px;overflow:hidden;background:#EAF1FF;box-shadow:0 16px 60px rgba(0,0,0,.25),0 4px 16px rgba(0,0,0,.15);font-family:var(--font);color:#2B3A5C;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.sg *,.sg *::before,.sg *::after{box-sizing:border-box}
+.sg svg.scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.win.fs::before{content:"";position:fixed;inset:0;background:#EAF1FF;z-index:49}
+.win.fs .sg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(96vw,calc(92dvh * 1.497));z-index:50}
+
+/* интерфейс — как в «Виммельбухе» */
+.sg .sg-stars{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:12}
+.sg .sg-starback{width:32px;height:32px;border-radius:50%;background:#6B91D6;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center}
+.sg .sg-starsvg{width:78%;height:78%;display:block;background:#D3E2FF;-webkit-mask:url(__STARURL__) center/contain no-repeat;mask:url(__STARURL__) center/contain no-repeat;transform:translateY(-4.5%)}
+.sg .sg-cbtn{position:absolute;top:12px;z-index:12;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);border:2px solid #6B91D6;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.sg .sg-repeat{left:14px}.sg .sg-fs{right:56px}.sg .sg-music{right:14px}
+.sg .sg-cbtn.sg-off{opacity:.45}
+.sg .sg-score-row{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:12;font-size:14px;font-weight:700}
+.sg .sg-score-chip{background:rgba(255,255,255,.92);border-radius:50px;padding:5px 14px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.1);color:#2B3A5C}
+.sg .sg-dot-score{width:10px;height:10px;border-radius:50%}
+.sg .sg-green{background:#6B91D6}.sg .sg-red{background:#D95B5B}
+.sg .sg-end-overlay{position:absolute;inset:0;border-radius:24px;background:rgba(107,145,214,.30);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:120}
+.sg.done .sg-end-overlay{display:flex}
+/* после каждой сцены: стеклянные кляксы по центру, экран не размыт */
+.sg .sg-end-overlay{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.sg .sg-blob-glass .sg-blob-bg{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.75)}
+.sg .sg-end-box{display:flex;align-items:center;justify-content:center;gap:3.2cqw}
+.sg .sg-nextbtn{width:10.7cqw;height:10.7cqw}.sg .sg-nextbtn .sg-blob-icon{width:46%;height:46%}
+.sg .sg-endbtn{width:8.5cqw;height:8.5cqw}.sg .sg-endbtn .sg-blob-icon{width:45%;height:45%}
+.sg .sg-start-overlay{position:absolute;inset:0;border-radius:24px;background:rgba(107,145,214,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:200}
+.sg.on .sg-start-overlay{display:none}
+.sg .sg-start-overlay .sg-start-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:88px;height:88px}
+.sg .sg-start-btn .sg-blob-icon{width:38px;height:38px}
+.sg .sg-start-cap{position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);width:86%;text-align:center;color:#fff;font-weight:700;font-size:15px;text-shadow:0 1px 4px rgba(0,0,0,.55)}
+.sg .sg-blob{position:relative;display:flex;align-items:center;justify-content:center;border:none;background:none;padding:0;min-width:0;cursor:pointer}
+.sg .sg-blob:active{filter:brightness(.96)}
+.sg .sg-blob .sg-blob-bg{position:absolute;inset:0;border-radius:42% 58% 63% 37%/45% 40% 60% 55%;animation:sg-morph 7s ease-in-out infinite}
+.sg .sg-blob-orange .sg-blob-bg{background:#F97A4F;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.sg .sg-blob-glass .sg-blob-bg{background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);border:2px solid rgba(255,255,255,.6);box-shadow:0 8px 22px rgba(0,0,0,.16),inset 0 3px 10px rgba(255,255,255,.4)}
+.sg .sg-blob-glass.sg-blob-delay .sg-blob-bg{animation-duration:8s;animation-delay:-2.6s}
+.sg .sg-blob-icon{position:relative;z-index:2}
+.sg .sg-blob-icon *{stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.sg .sg-blob-icon.sg-play path{fill:#fff;stroke:#fff}
+.sg button:focus-visible{outline:3px solid #F97A4F;outline-offset:3px}
+@keyframes sg-morph{0%,100%{border-radius:42% 58% 63% 37%/45% 40% 60% 55%;transform:scale(1)}33%{border-radius:60% 40% 42% 58%/55% 58% 42% 45%;transform:scale(1.02)}66%{border-radius:38% 62% 55% 45%/60% 42% 58% 40%;transform:scale(1.04)}}
+@media (prefers-reduced-motion:reduce){.sg .sg-blob .sg-blob-bg{animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="gdefs">
+  <linearGradient id="gDusk" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="720"><stop offset="0" stop-color="#6B91D6"/><stop offset=".55" stop-color="#B8A0E0"/><stop offset="1" stop-color="#FCD0DC"/></linearGradient>
+  <linearGradient id="gDay" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="560"><stop offset="0" stop-color="#ADC7FE"/><stop offset=".6" stop-color="#D3E2FF"/><stop offset="1" stop-color="#EAF1FF"/></linearGradient>
+  <linearGradient id="gWater" gradientUnits="userSpaceOnUse" x1="0" y1="520" x2="0" y2="900"><stop offset="0" stop-color="#B8E0E0"/><stop offset=".5" stop-color="#98B8FC"/><stop offset="1" stop-color="#6B91D6"/></linearGradient>
+  <linearGradient id="gSea" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="820"><stop offset="0" stop-color="#B8E0E0"/><stop offset=".45" stop-color="#98B8FC"/><stop offset="1" stop-color="#6B91D6"/></linearGradient>
+  <linearGradient id="gSand" gradientUnits="userSpaceOnUse" x1="0" y1="740" x2="0" y2="900"><stop offset="0" stop-color="#FDE6C4"/><stop offset="1" stop-color="#F8B888"/></linearGradient>
+  <radialGradient id="gMoon"><stop offset="0" stop-color="#FFF8A8" stop-opacity=".9"/><stop offset="1" stop-color="#FFF8A8" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gFish" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#FFC880"/><stop offset=".55" stop-color="#FF8A20"/><stop offset="1" stop-color="#DC8818"/></radialGradient>
+  <radialGradient id="gFrog" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#B0E060"/><stop offset=".6" stop-color="#70CC10"/><stop offset="1" stop-color="#4AA010"/></radialGradient>
+  <radialGradient id="gOwl" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#D0A090"/><stop offset=".6" stop-color="#C47860"/><stop offset="1" stop-color="#A86448"/></radialGradient>
+  <linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900"><stop offset="0" stop-color="#ADC7FE"/><stop offset=".55" stop-color="#D3E2FF"/><stop offset="1" stop-color="#EAF1FF"/></linearGradient>
+  <radialGradient id="sunGlow"><stop offset="0" stop-color="#FFF8A8" stop-opacity=".95"/><stop offset="1" stop-color="#FFF8A8" stop-opacity="0"/></radialGradient>
+  <linearGradient id="hillFar" gradientUnits="userSpaceOnUse" x1="0" y1="390" x2="0" y2="900"><stop offset="0" stop-color="#CCF0A0"/><stop offset="1" stop-color="#ACD48C"/></linearGradient>
+  <linearGradient id="hillMid" gradientUnits="userSpaceOnUse" x1="0" y1="495" x2="0" y2="900"><stop offset="0" stop-color="#ACD48C"/><stop offset="1" stop-color="#88A848"/></linearGradient>
+  <linearGradient id="meadow" gradientUnits="userSpaceOnUse" x1="0" y1="560" x2="0" y2="900"><stop offset="0" stop-color="#9CC05C"/><stop offset="1" stop-color="#88A848"/></linearGradient>
+  <radialGradient id="bodyShade" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#D3E2FF"/><stop offset=".6" stop-color="#C3CFE2"/><stop offset="1" stop-color="#A8B0C8"/></radialGradient>
+  <radialGradient id="headShade" cx=".42" cy=".32" r=".75"><stop offset="0" stop-color="#DCE6F6"/><stop offset=".65" stop-color="#C3CFE2"/><stop offset="1" stop-color="#A8B0C8"/></radialGradient>
+  <radialGradient id="carrotG" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFC880"/><stop offset=".5" stop-color="#FF8A20"/><stop offset="1" stop-color="#DC8818"/></radialGradient>
+</defs></svg>
+
+<div class="wrap">
+  <h1>Повелительное наклонение · прототипы сцен</h1>
+  <div class="board" id="board"></div>
+</div>
