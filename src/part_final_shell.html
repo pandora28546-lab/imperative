@@ -163,7 +163,8 @@
 #sg-fs-wrap:-webkit-full-screen #sofia-game { box-shadow: none; }
 #sg-bigstar { will-change: transform; }
 /* после каждой сцены: стеклянные кляксы по центру, без размытия */
-#sg-scene-end { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; gap: 3.2cqw; }
+#sg-scene-end { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; gap: 3.2cqw; pointer-events: none; }
+#sg-scene-end button { pointer-events: auto; }   /* верхние кнопки остаются нажимаемыми */
 #sofia-game.sg-btns #sg-scene-end { display: flex; }
 #sg-again { width: 8.5cqw; height: 8.5cqw; }
 #sg-again .sg-blob-icon { width: 45%; height: 45%; }

@@ -82,11 +82,11 @@ function startScene(isFirst){mark("старт сцены");var sc=cur();stopSpee
     if(isFirst)playSpeech(REPO+POVTORI,cmd);else cmd()},(isFirst?.3:PRE_VOICE)*1000)}
 var sceneToken=0;
 
-/* тап по животному — с начала команды */
+/* тап по животному — после команды */
 function toSvg(sc,ev){var r=sc.svg.getBoundingClientRect(),v=sc.vb,k=Math.max(r.width/v[2],r.height/v[3]),ox=(r.width-v[2]*k)/2,oy=(r.height-v[3]*k)/2;
   return{x:v[0]+(ev.clientX-r.left-ox)/k,y:v[1]+(ev.clientY-r.top-oy)/k}}
 stage.addEventListener("pointerdown",function(ev){
-  if(!started||(phase!=="voice"&&phase!=="ready"))return;
+  if(!started||phase!=="ready")return;   /* нажать можно, только когда команда договорена */
   var sc=cur(),p=toSvg(sc,ev),c=sc.S.center(),rad=clamp(210*c.sc,sc.vb[2]*.14,sc.vb[2]*.3);
   if(Math.hypot(p.x-c.x,p.y-c.y)>rad)return;
   mark("тап");sceneToken++;stopSpeech();hideHint();phase="act";t0=clock;first=true;playMusic(runEl,goURL(sc.v))});
