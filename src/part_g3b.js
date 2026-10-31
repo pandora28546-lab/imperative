@@ -202,7 +202,7 @@ function makeOUT(R){
   el("ellipse",{cx:0,cy:-26,rx:38,ry:24,fill:"#C08A78"},MB);el("ellipse",{cx:8,cy:-13,rx:24,ry:8,fill:"#FDE6C4"},MB);
   var head=el("g",{},MB);
   el("circle",{cx:12,cy:-60,r:15,fill:"#C08A78"},head);el("circle",{cx:12,cy:-60,r:9,fill:"#FCC4BC"},head);
-  el("path",{d:"M10 -40 C18 -60 50 -52 64 -37 C54 -24 24 -20 10 -30Z",fill:"#D0A090"},head);
+  el("path",{d:"M14 -45 C22 -62 50 -54 64 -37 C54 -24 28 -20 14 -27 C4 -32 4 -41 14 -45Z",fill:"#D0A090"},head);
   el("circle",{cx:28,cy:-58,r:19,fill:"#D0A090"},head);el("circle",{cx:28,cy:-58,r:12,fill:"#FCC4BC"},head);
   el("circle",{cx:46,cy:-31,r:5.5,fill:"#FC88A8",opacity:.5},head);el("circle",{cx:64,cy:-37,r:5.5,fill:"#FC88A8"},head);el("circle",{cx:62.5,cy:-38.5,r:1.6,fill:"#FFFFFF"},head);
   el("path",{d:"M58 -38 l22 -8 M58 -35 l23 -1 M58 -32 l21 5",stroke:"#985038","stroke-width":1.4,"stroke-linecap":"round"},head);

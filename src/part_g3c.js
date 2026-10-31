@@ -116,9 +116,9 @@ function makeTAKE(R){
   var dec=el("g",{},R);[[620,880,1.1],[900,1010,1.3],[1380,900,1],[1600,980,1.2],[520,1040,1.4],[1250,1060,1.3]].forEach(function(p){spinifex(dec,p[0],p[1],p[2])});
   [[740,960,30,14],[1500,1030,40,18],[1040,860,18,8]].forEach(function(r){el("ellipse",{cx:r[0],cy:r[1],rx:r[2],ry:r[3],fill:"#C47860"},dec);el("ellipse",{cx:r[0]-r[2]*.3,cy:r[1]-r[3]*.4,rx:r[2]*.4,ry:r[3]*.3,fill:"#D0A090"},dec)});
   for(var i=0;i<40;i++)el("circle",{cx:f1(rr(400,1800)),cy:f1(rr(810,1080)),r:f1(rr(2,4)),fill:"#C47860",opacity:.5},dec);
-  var SC=1.5,KY=920,BX=1120,BR=22;
+  var SC=1.5,KY=920,BX=1190,BR=22;
   var shadow=el("ellipse",{rx:62*SC,ry:9*SC,fill:"#2C3A5C",opacity:.13},R),bsh=el("ellipse",{cx:BX,cy:KY+3,rx:BR,ry:7,fill:"#2C3A5C",opacity:.13},R);
-  function mkToy(p,s){var g=el("g",{},p),i=el("g",{transform:"scale("+s+")"},g);el("path",{d:"M-34 -6 L-46 -20 Q-44 -2 -32 6Z",fill:"#FFD400",stroke:"#FFD400","stroke-width":6,"stroke-linejoin":"round"},i);el("ellipse",{cx:0,cy:0,rx:36,ry:22,fill:"#FFD400"},i);el("ellipse",{cx:-6,cy:-2,rx:16,ry:9,fill:"#FFC880"},i);el("circle",{cx:18,cy:-28,r:17,fill:"#FFD400"},i);el("ellipse",{cx:36,cy:-25,rx:10,ry:5.5,fill:"#F97A4F"},i);el("circle",{cx:22,cy:-32,r:3.2,fill:"#2C3A5C"},i);el("circle",{cx:14,cy:-22,r:4,fill:"#FC88A8",opacity:.5},i);return g}
+  function mkToy(p,s){var g=el("g",{},p),i=el("g",{transform:"scale("+s+")"},g);el("path",{d:"M-40 6 L-40 -8 Q-40 -14 -32 -15 L-16 -16 L-8 -34 Q-6 -38 0 -38 L18 -38 Q24 -38 26 -32 L32 -16 L36 -15 Q42 -14 42 -6 L42 6Z",fill:"#6B91D6",stroke:"#6B91D6","stroke-width":6,"stroke-linejoin":"round"},i);el("path",{d:"M-4 -32 L6 -32 L6 -18 L-11 -18Z",fill:"#EAF1FF",stroke:"#EAF1FF","stroke-width":3,"stroke-linejoin":"round"},i);el("path",{d:"M11 -32 L19 -32 L24 -18 L11 -18Z",fill:"#EAF1FF",stroke:"#EAF1FF","stroke-width":3,"stroke-linejoin":"round"},i);el("circle",{cx:38,cy:-6,r:4,fill:"#FFD400"},i);el("rect",{x:-30,y:-4,width:18,height:4,rx:2,fill:"#98B8FC"},i);[-24,26].forEach(function(x){el("circle",{cx:x,cy:10,r:12,fill:"#2C3A5C"},i);el("circle",{cx:x,cy:10,r:5,fill:"#BABABA"},i)});return g}
   function mkBall(p,r){var g=el("g",{},p);el("circle",{r:r,fill:"#6B91D6"},g);el("path",{d:"M"+(-r)+" 0 Q0 "+(-r*.5)+" "+r+" 0",stroke:"#FFFFFF","stroke-width":r*.25,fill:"none"},g);el("circle",{cx:-r*.35,cy:-r*.4,r:r*.2,fill:"#FFFFFF",opacity:.7},g);return g}
   var K=el("g",{},R),KB=el("g",{},K);
   var tail=el("g",{},KB);el("path",{d:"M-24 -60 C-56 -40 -96 -14 -130 -5 Q-140 1 -128 4 C-92 4 -50 -6 -12 -30Z",fill:"#A86448"},tail);
@@ -127,7 +127,7 @@ function makeTAKE(R){
   el("path",{d:"M-18 -6 L54 -8 Q66 -3 54 2 L-18 2Z",fill:"#A86448",stroke:"#A86448","stroke-width":7,"stroke-linejoin":"round"},thigh);
   el("path",{d:"M-30 -56 C-36 -94 -16 -138 14 -148 C38 -154 48 -128 44 -98 C40 -72 30 -46 10 -34 C-8 -26 -26 -36 -30 -56Z",fill:"#C47860"},KB);
   el("path",{d:"M10 -136 C30 -132 38 -110 32 -84 C26 -62 16 -46 2 -40 C10 -70 6 -110 10 -136Z",fill:"#FDE6C4"},KB);
-  var pBall=mkToy(KB,.42);tr(pBall,"translate(16 -76)");pBall.setAttribute("opacity",0);
+  var pBall=mkToy(KB,.4);tr(pBall,"translate(18 -72)");pBall.setAttribute("opacity",0);
   el("path",{d:"M5 -74 Q19 -62 33 -76 C31 -62 24 -52 12 -48 C7 -56 5 -64 5 -74Z",fill:"#FDE6C4"},KB);el("path",{d:"M5 -74 Q19 -62 33 -76",stroke:"#A86448","stroke-width":3.4,fill:"none","stroke-linecap":"round"},KB);
   el("path",{d:"M4 -138 C8 -158 22 -176 38 -176 L46 -160 C36 -150 26 -140 22 -126Z",fill:"#C47860"},KB);
   var head=el("g",{},KB);
@@ -138,7 +138,7 @@ function makeTAKE(R){
   var ke=eyeG(head,46,-180,5),kh=happyArc(head,46,-179,6);
   var armB=strokeLeg(KB,"","#985038",10),armF=strokeLeg(KB,"","#A86448",11),hB=el("ellipse",{rx:6.5,ry:5.5,fill:"#985038"},KB),hF=el("ellipse",{rx:7,ry:6,fill:"#A86448"},KB);
   var ball=mkToy(R,.95);
-  var X0=800,X1=1010,tw={};S.kx=X0;S.ky=KY;S.lean=0;
+  var X0=800,X1=1080,tw={};S.kx=X0;S.ky=KY;S.lean=0;
   S.init=function(){};
   S.reset=function(){S.kx=X0;S.lean=0;pBall.setAttribute("opacity",0);ball.setAttribute("opacity",1);tr(ball,"translate("+BX+" "+(KY-BR)+")");bsh.setAttribute("opacity",.13);happy(false,[ke],[kh])};
   S.cam=function(){return[clamp(S.kx-310,VX0,VX1),330,1100,733]};
