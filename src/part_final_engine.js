@@ -43,8 +43,11 @@ function playSpeech(url,onDone){stopSpeech();var my=speechSeq;
   speechTimer=setTimeout(finish,8000);try{speechEl.src=srcFor(url);speechEl.currentTime=0}catch(e){}var p=speechEl.play();if(p&&p.catch)p.catch(function(){finish()})}
 /* музыку сцены грузим в плеер заранее (cueMusic при старте сцены): на iPad смена src блокирует страницу на 0,2–0,8 с,
    и если делать это в момент тапа, анимация стартует с рывка */
-function cueMusic(a,url){var u=srcFor(url);if(a.__u===u)return;try{a.pause();a.src=u;a.__u=u;a.load()}catch(e){}}
-function playMusic(a,url){cueMusic(a,url);try{a.currentTime=0;a.muted=!musicOn}catch(e){}var p=a.play();if(p&&p.catch)p.catch(function(){})}
+function cueMusic(a,url){var u=srcFor(url);if(a.__u===u)return;var t=performance.now();try{a.pause();a.src=u;a.__u=u;a.load()}catch(e){}audioStall("загрузка музыки",t)}
+function playMusic(a,url){cueMusic(a,url);var t=performance.now();try{a.currentTime=0;a.muted=!musicOn}catch(e){}var p=a.play();if(p&&p.catch)p.catch(function(){});audioStall("запуск музыки",t)}
+/* на iPad запуск/загрузка HTMLAudio иногда блокирует страницу на 0,1–0,3 с. Анимацию после такой паузы
+   не догоняем (иначе она прыгает вперёд) — просто продолжаем с того же места. */
+function audioStall(name,t){var d=performance.now()-t;if(d<30)return;last=performance.now()/1000;dgNote(name+" "+Math.round(d)+" мс · сцена "+(idx+1)+" "+ITEMS[idx].v+" · "+phase+" (скачок анимации убран)")}
 function stopMusic(){[runEl,finEl].forEach(function(a){try{a.pause()}catch(e){}})}
 function playFx(f){try{fxEl.src=srcFor(DBASE+encodeURIComponent(f));fxEl.currentTime=0}catch(e){}var p=fxEl.play();if(p&&p.catch)p.catch(function(){})}
 
@@ -111,7 +114,7 @@ $id("sg-again").addEventListener("click",function(){if(stageBusy)return;startSce
    Тяжёлая первая отрисовка приходится на неподвижную картинку, поэтому рывка не видно. Через 2 кадра слои меняются местами. */
 var frozen=false;
 $id("sg-go").addEventListener("click",function(){if(stageBusy||frozen)return;if(idx>=ITEMS.length-1)return;showBtns(false);var n=idx+1;
-  mark("дальше");frozen=true;prewarm();
+  mark("дальше");frozen=true;prewarm();cueMusic(runEl,goURL(ITEMS[n].v));cueMusic(finEl,finURL(ITEMS[n].v));
   requestAnimationFrame(function(){requestAnimationFrame(function(){show(n);frozen=false;startScene(false)})})});
 $id("sg-repeat").addEventListener("click",function(){if(!started||(phase!=="voice"&&phase!=="ready"))return;var sc=cur(),my=++sceneToken;hideHint();phase="voice";
   playSpeech(vURL(sc.v),function(){if(my!==sceneToken||phase!=="voice")return;phase="ready";hintAt=clock+HINT_NEXT})});
@@ -143,6 +146,7 @@ function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
 var FPS=/[?&]fps/.test(location.search)||/[?&]fps/.test((function(){try{return top.location.search}catch(e){return ""}})());
 var dgBar=null,dgN=0,dgT=0,dgMax=0,dgEv="—",dgEvT=0,dgLog=[];
 function mark(name){if(FPS){dgEv=name;dgEvT=performance.now()/1000}}
+function dgNote(txt){if(!FPS)return;dgLog.unshift(txt);if(dgLog.length>4)dgLog.pop()}
 function dgFrame(n,raw){if(!dgBar){dgBar=document.createElement("div");
     dgBar.style.cssText="position:absolute;left:0;right:0;bottom:0;z-index:300;background:rgba(20,28,48,.82);color:#fff;font:600 12px/1.35 monospace;padding:5px 10px 6px;pointer-events:none;white-space:pre";
     game.appendChild(dgBar);dgT=n}
