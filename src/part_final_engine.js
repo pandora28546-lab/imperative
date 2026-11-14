@@ -22,10 +22,10 @@ function buildScene(k){if(scenes[k])return scenes[k];var it=ITEMS[k];
   var vb=S.vb.split(" ").map(Number);
   var hint=el("g",{opacity:0},svg),waves=[0,1,2].map(function(){return el("circle",{r:f1(vb[2]*.065),fill:"none",stroke:"#6B91D6","stroke-width":4,"vector-effect":"non-scaling-stroke",opacity:0},hint)});
   svg.style.display="none";
-  var sc={svg:svg,S:S,hint:hint,waves:waves,vb:vb,v:it.v};scenes[k]=sc;S.init();syncGrain();still(sc);return sc}
+  var sc={svg:svg,S:S,hint:hint,waves:waves,vb:vb,v:it.v};scenes[k]=sc;S.init();if(typeof style2==="function")sc.s2=style2(R,S,it.make.name,svg);syncGrain();still(sc);return sc}
 buildScene(0);
 function cam(sc){if(sc.S.cam){var v=sc.S.cam();sc.vb=v;sc.svg.setAttribute("viewBox",v.map(f1).join(" "))}}
-function still(sc){sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);cam(sc);sc.hint.setAttribute("opacity",0)}
+function still(sc){if(sc.s2)sc.s2.soft(true);sc.S.reset();sc.S.ambient(0,0,"intro");sc.S.idle(0,0,false);cam(sc);sc.hint.setAttribute("opacity",0)}
 
 /* ─── аудио (HTMLAudio + blob-URL, как в «Виммельбухе») ─── */
 var objUrls={};function srcFor(u){return objUrls[u]||u}
@@ -89,7 +89,7 @@ stage.addEventListener("pointerdown",function(ev){
   if(!started||phase!=="ready")return;   /* нажать можно, только когда команда договорена */
   var sc=cur(),p=toSvg(sc,ev),c=sc.S.center(),rad=clamp(210*c.sc,sc.vb[2]*.14,sc.vb[2]*.3);
   if(Math.hypot(p.x-c.x,p.y-c.y)>rad)return;
-  mark("тап");sceneToken++;stopSpeech();hideHint();phase="act";t0=clock;first=true;playMusic(runEl,goURL(sc.v))});
+  mark("тап");sceneToken++;stopSpeech();hideHint();phase="act";t0=clock;first=true;if(sc.s2&&sc.s2.cam)sc.s2.soft(false);playMusic(runEl,goURL(sc.v))});
 
 /* ─── звёзды / финал ─── */
 function flyBigStar(slot,cb){var back=starBacks[slot],gr=game.getBoundingClientRect(),br=back.getBoundingClientRect();
@@ -138,7 +138,7 @@ function step(dt){clock+=dt;var t=clock,sc=cur(),S=sc.S,e=t-t0;
     if(phase==="ready"&&t>=hintAt){var c=S.center(),hx=t-hintAt;sc.hint.setAttribute("opacity",1);
       sc.waves.forEach(function(wv,i){var qq=hx-i*1.2;if(qq<0){wv.setAttribute("opacity",0);return}var u=(qq%3.6)/3.6,k=1-Math.pow(1-u,2);
         tr(wv,"translate("+f1(c.x)+" "+f1(c.y)+") scale("+(.5+1.3*k).toFixed(3)+")");wv.setAttribute("opacity",(.8*(1-k)).toFixed(3))})}}
-  else if(phase==="act"){var done=S.act(e,dt,first,t);first=false;if(done||e>=S.ACT){phase="fin";t0=t;mark("финал сцены");playMusic(finEl,finURL(sc.v))}}
+  else if(phase==="act"){var done=S.act(e,dt,first,t);first=false;if(done||e>=S.ACT){phase="fin";t0=t;if(sc.s2)sc.s2.soft(true);mark("финал сцены");playMusic(finEl,finURL(sc.v))}}
   else if(phase==="fin"||phase==="post"||phase==="end"){S.fin(e,t,dt);if(phase==="fin"&&e>BTN_AFTER){phase="post";sceneDone()}}}
 /* ─── диагностика: бар снизу (добавить ?fps к адресу страницы) ───
    1-я строка: кадры в секунду, худший кадр за секунду, плотность пикселей, размер поля, полный экран.

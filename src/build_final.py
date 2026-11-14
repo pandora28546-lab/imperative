@@ -81,7 +81,8 @@ for g,(title,seq) in GAMES.items():
     if ONLY and str(g)!=ONLY:continue
     seqjs='['+','.join('['+','.join('{v:"%s",make:%s}'%(v,m) for v,m in st)+']' for st in seq)+']'
     eng=eng0.replace('__SEQ__',seqjs)
-    js='/* Повелительное наклонение — игра %d. Сцены + движок. */\n(function(){\n"use strict";\nif(!document.getElementById("gdefs")){var d=document.createElement("div");d.innerHTML=%s;document.body.appendChild(d.firstChild)}\nvar NS="http://www.w3.org/2000/svg",DEFS=document.getElementById("gdefs");\n'%(g,json.dumps(defs))+lib+'\n'+sc+'\n'+new+'\n'+s3+'\n'+eng+'\n})();\n'
+    S2=open('part_style2.js').read() if g==1 else ''
+    js='/* Повелительное наклонение — игра %d. Сцены + движок. */\n(function(){\n"use strict";\nif(!document.getElementById("gdefs")){var d=document.createElement("div");d.innerHTML=%s;document.body.appendChild(d.firstChild)}\nvar NS="http://www.w3.org/2000/svg",DEFS=document.getElementById("gdefs");\n'%(g,json.dumps(defs))+lib+'\n'+S2+'\n'+sc+'\n'+new+'\n'+s3+'\n'+eng+'\n})();\n'
     open('final/imperative-%d.js'%g,'w').write(js)
     html=shell.replace('__TITLE__',title).replace('__JS__','https://cdn.jsdelivr.net/gh/pandora28546-lab/imperative@main/imperative-%d.js'%g)
     open('final/imperative-%d.html'%g,'w').write(html)

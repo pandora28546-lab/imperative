@@ -53,10 +53,8 @@ function makeBEGI(R){
     el("path",{d:"M"+mid.join(" L"),fill:"none",stroke:"#FFFCDC","stroke-width":10,"stroke-linecap":"round",opacity:.75},road);
     for(var j=0;j<110;j++){var f3=rr(0,FL),side=rr(-.85,.85),p3=FP(f3),a3=Ftan(f3),w3=FW(f3)*side,sc=FW(f3)/100;
       el("ellipse",{cx:f1(p3.x-Math.sin(a3)*w3),cy:f1(p3.y+Math.cos(a3)*w3),rx:f1(rr(3,7)*sc*1.4+.5),ry:f1(rr(2,4)*sc*1.4+.4),fill:rnd()<.5?"#D0A090":"#F8B888",opacity:.85},road)}
-    for(var m2=0;m2<190;m2++){var f4=rr(0,FL),sd=rnd()<.5?-1:1,a4=Ftan(f4),p4=FP(f4),w4=FW(f4)-2,qq={x:p4.x-Math.sin(a4)*w4*sd,y:p4.y+Math.cos(a4)*w4*sd},h=rr(10,22)*Math.max(.3,FW(f4)/70);
-      el("path",{d:"M"+f1(qq.x)+" "+f1(qq.y)+" q"+f1(rr(-4,4))+" "+f1(-h/2)+" "+f1(rr(-6,6))+" "+f1(-h),stroke:rnd()<.5?"#4AA010":"#6E9A30","stroke-width":3,"stroke-linecap":"round",fill:"none"},road)}
     R.insertBefore(grain(null,["hFar"]),q("farTrees"));R.insertBefore(grain(null,["hMid","hMeadow","hroadShape"]),q("decoBack"));
-    blades(q("midTex"),160,0,1600,520,900,"#88A848",12,2.4);blades(q("meadowTex"),380,0,1600,610,900,"#6E9A30",16,2.8);blades(q("meadowTex"),120,0,1600,640,900,"#B0D870",14,2.4);
+    blades(q("midTex"),160,0,1600,520,900,"#88A848",12,2.4);blades(q("meadowTex"),440,0,1600,610,1000,"#6E9A30",16,2.8);blades(q("meadowTex"),140,0,1600,640,1000,"#B0D870",14,2.4);
     [[250,440,1],[330,428,.8],[640,420,.9],[960,402,1.1],[1040,410,.8],[1330,418,.95]].forEach(function(t){tree(q("farTrees"),t[0],t[1],t[2])});
     [[300,150,1,.25],[760,115,.75,.18],[1500,215,.9,.22]].forEach(function(c){var cg=el("g",{},q("hclouds"));
       [[0,0,48],[45,-18,40],[88,4,38],[-42,10,32],[40,18,44]].forEach(function(b){el("circle",{cx:b[0],cy:b[1],r:b[2],fill:"#FFFFFF"},cg)});
@@ -67,7 +65,7 @@ function makeBEGI(R){
     [[120,730,1.2],[1500,690,1],[90,860,1.4],[1520,860,1.3],[640,880,1.3],[980,870,1.2],[1420,640,.8],[200,640,.9]].forEach(function(f,i){flower(front,f[0],f[1],f[2],i%4,flowers)});
     var mu=el("g",{transform:"translate(1330 715) scale(.95)"},front);el("path",{d:"M-10 0 q-4 -28 2 -36 h16 q6 8 2 36z",fill:"#FFFCDC"},mu);el("path",{d:"M-38 -30 q38 -54 76 0 q-38 10 -76 0z",fill:"#CC1A14"},mu);
     [[-18,-38,6],[6,-48,7],[22,-34,5]].forEach(function(z){el("circle",{cx:z[0],cy:z[1],r:z[2],fill:"#FFFFFF"},mu)});
-    var bu=el("g",{transform:"translate(1010 572) scale(.8)"},back);[[-30,0,34],[10,-14,40],[48,2,32]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#289440"},bu)});
+    var bu=el("g",{transform:"translate(1150 800) scale(.8)"},back);[[-30,0,34],[10,-14,40],[48,2,32]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#289440"},bu)});
     [[-20,-10],[18,-30],[40,-6],[0,4]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:6,fill:"#CC1A14"},bu)});
     var cp=el("clipPath",{id:"soilClip"},DEFS);el("rect",{x:-80,y:-220,width:160,height:226},cp);
     var end=P(LEN);[[74,62,.9],[26,70,.8],[118,76,.75]].forEach(function(o,i){var cg=el("g",{transform:"translate("+(end.x+o[0])+" "+(end.y+o[1])+") scale("+o[2]+")"},q("patch"));
@@ -86,7 +84,7 @@ function makeBEGI(R){
   function puff(x,y,sc){var n=0;for(var i=0;i<dust.length&&n<3;i++){var d=dust[i];if(d.life<=0){d.life=1;d.x=x+rr(-14,6)*sc;d.y=y-rr(0,6)*sc;d.vx=-rr(30,90)*sc;d.vy=-rr(20,50)*sc;d.r0=rr(7,12)*sc;n++}}}
   function pose(o){
     tr(H.hareRoot,"translate("+o.x.toFixed(2)+" "+o.y.toFixed(2)+") scale("+o.sc.toFixed(4)+")");
-    var sh=1-clamp(o.h/120,0,.5);tr(H.hshadow,"scale("+sh.toFixed(3)+" 1)");H.hshadow.setAttribute("opacity",(.2*sh).toFixed(3));
+    var sh=1-clamp(o.h/120,0,.5);tr(H.hshadow,"scale("+sh.toFixed(3)+" 1)");H.hshadow.setAttribute("opacity",(.13*sh).toFixed(3));
     tr(H.hop,"translate(0 "+(-o.h).toFixed(2)+")");tr(H.rig,"rotate("+o.rot.toFixed(2)+" 0 -80) scale("+o.sx.toFixed(4)+" "+o.sy.toFixed(4)+")");
     tr(H.legB,"rotate("+o.lb.toFixed(2)+" -46 -60)");tr(H.legF,"rotate("+o.lf.toFixed(2)+" 52 -68)");tr(H.legF2,"rotate("+o.lf2.toFixed(2)+" 37 -68)");
     tr(H.hhead,"rotate("+o.hd.toFixed(2)+" 60 -112)");tr(H.earL,"rotate("+o.el.toFixed(2)+" 68 -178)");tr(H.earR,"rotate("+o.er.toFixed(2)+" 96 -180)");
@@ -129,6 +127,7 @@ function makeBEGI(R){
     H.eyeOpen.setAttribute("opacity",0);H.eyeHappy.setAttribute("opacity",1);
     var cu=clamp((e-.15)/.4,0,1),cb=Math.sin(Math.PI*cu)*12;tr(carrot,"translate(0 "+f1(44-80*Math.min(1,cu*1.3)-cb)+") rotate("+f1(Math.sin(e*6)*6*Math.max(0,1-e))+")");
     if(e>1.6)o.sy*=1+.018*Math.sin(t*2.6);pose(o)};
+  S.ch=function(){return H.hop};
   return S}
 
 /* shared flower used by several scenes */
@@ -370,6 +369,7 @@ function makeGALLOP(R){
   S.fin=function(e,t,dt){var p=path.at(1),o={x:p.x,y:p.y,sc:scl(1)};var r=e<.9?Math.sin(Math.PI*e/.9):0;o.rot=-16*r;o.legs=[0,0,-40*r,-50*r];o.knee=[0,0,70*r,80*r];
     o.tl=Math.sin(e*10)*16*Math.max(.3,1-e/1.5);o.nk=-8*r+Math.sin(e*6)*3;o.hd=Math.sin(e*8)*6*Math.max(0,1-e/1.6);o.mn=Math.sin(e*12)*3;
     if(e>.25){pHappy.setAttribute("opacity",1);o.blink=1}if(e>.88&&e-dt<=.88)puff(p.x+50*o.sc,p.y,o.sc);pose(o)};
+  S.ch=function(){return PB};
   return S}
 
 /* ==========================================================

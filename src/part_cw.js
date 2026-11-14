@@ -61,6 +61,7 @@ function makeCRAWL(R){
     trailPts.push(f1(p.x-90*SCL)+" "+f1(p.y-4));if(trailPts.length>1)trail.setAttribute("d","M"+trailPts.join(" L"));pose(o);return u>=1};
   S.fin=function(e,t,dt){var p=path.at(U()),o={x:p.x,y:p.y};o.rot=clamp(path.ang(U()),-12,12)*.6;o.sa=Math.sin(e*8)*10*Math.max(.2,1-e/1.5);o.sp=6+Math.sin(e*10)*6;o.shy=-Math.abs(Math.sin(e*6))*4*Math.max(0,1-e);
     if(e>.25){happy.forEach(function(h){h.setAttribute("opacity",1)});eyes.forEach(function(x){x.setAttribute("opacity",0)})}pose(o)};
+  S.ch=function(){return body};
   return S}
 
 /* ==========================================================
@@ -137,5 +138,6 @@ function makeWALK(R){
   S.fin=function(e,t,dt){var p=path.at(U()),o={x:p.x,y:p.y};var j=e<.6?Math.abs(Math.sin(Math.PI*e/.3)):0;o.h=j*12;o.wg=-Math.abs(Math.sin(e*14))*30*Math.max(0,1-e/1.2);o.hd=Math.sin(e*4)*6;
     if(e>.25){dHappy.setAttribute("opacity",1);o.blink=1;mHappy.setAttribute("opacity",1);mEye.setAttribute("opacity",0)}
     tr(MH,"rotate("+f1(Math.sin(e*5)*8*Math.max(0,1-e/1.8)-6)+" 50 -40)");pose(o)};
+  S.ch=function(){return DB};
   return S}
 

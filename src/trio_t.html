@@ -185,6 +185,7 @@ var FLY=(function(){
     var b=Math.sin(Math.PI*clamp(el_/.4,0,1));o.sy=1-.08*b;o.sx=1+.06*b;o.rot=Math.sin(el_*5)*6*Math.max(0,1-el_/1.6);
     if(el_>.35)happy.setAttribute("opacity",1);
     o.blink=el_>.35?1:0;tr(feet,"");pose(o)};
+  S.ch=function(){return body};
   return S})();
 
 /* ==========================================================
@@ -283,6 +284,7 @@ var JUMP=(function(){
   S.fin=function(el_,t,dt){var L=PADS[4],o={x:L[0],y:L[1]-8,sc:L[2]*1.15};var c=el_%0.9;o.th=c<.5?Math.sin(Math.PI*c/.5)*.55:0;
     if(el_>.2){fhappy.setAttribute("opacity",1);o.blink=1}o.rot=Math.sin(el_*6)*3*Math.max(0,1-el_/1.5);
     var op=clamp((el_-.1)/.9,0,1),e=1-Math.pow(1-op,3);petals.forEach(function(p){tr(p.e,"rotate("+f1(p.i*lerp(7,24,e))+" 0 0)")});lcore.setAttribute("opacity",e.toFixed(2));pose(o)};
+  S.ch=function(){return FB};
   return S})();
 
 /* ==========================================================
@@ -358,6 +360,7 @@ var SWIM=(function(){
     S.pos=o;pose(o);return u>=1};
   S.fin=function(el_,t,dt){var o={x:S.pos.x,y:S.pos.y+Math.sin(el_*2)*4,sc:S.pos.sc};o.tail=Math.sin(el_*16)*22*Math.max(.3,1-el_/1.2);o.rot=Math.sin(el_*5)*8*Math.max(0,1-el_/1.6);o.pec=Math.sin(el_*10)*25;
     if(el_>.25){shap.setAttribute("opacity",1);o.blink=1}if(el_<.6&&Math.floor(el_*8)!==Math.floor((el_-dt)*8)&&el_>.2)bubble(o.x+76*o.sc,o.y,.5);pose(o)};
+  S.ch=function(){return FB};
   return S})();
 
 /* ---------- engine ---------- */

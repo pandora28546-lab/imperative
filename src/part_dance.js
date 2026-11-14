@@ -58,4 +58,5 @@ function makeDANCE(R){
     pose(o);return e>=S.ACT};
   S.fin=function(e,t,dt){push=1;var o={fl:80+Math.sin(e*10)*12,fr:80+Math.sin(e*10+1)*12,rot:Math.sin(e*4)*4*Math.max(0,1-e/1.5),h:e<.35?Math.sin(Math.PI*e/.35)*16:0};
     if(e>.25){[ph1,ph2].forEach(function(h){h.setAttribute("opacity",1)});o.blink=1}pose(o)};
+  S.ch=function(){return PB};
   return S}

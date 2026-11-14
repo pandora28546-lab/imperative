@@ -62,6 +62,7 @@ function makeSWING(R){
   S.act=function(e,dt){var A=Math.min(1,e/.9)*42;A=A*(e<.9?Math.sin(Math.PI/2*e/.9):1);var o={th:A*Math.sin(2*Math.PI*e/P),hd:-4};o.wave=-14*Math.sin(2*Math.PI*e/P);pose(o,dt);return e>=S.ACT};
   S.fin=function(e,t,dt){var A=42*Math.exp(-1.3*e);var o={th:A*Math.sin(2*Math.PI*(S.ACT+e)/P),hd:Math.sin(e*3)*4};o.wave=-60-18*Math.sin(e*8)*Math.max(0,1-e/2);
     if(e>.3){[mh1,mh2].forEach(function(h){h.setAttribute("opacity",1)});[me1,me2].forEach(function(h){h.setAttribute("opacity",0)})}pose(o,dt)};
+  S.ch=function(){return MB};
   return S}
 
 /* ---------- СЯДЬ: собака смотрит прямо на нас и садится ---------- */
@@ -117,6 +118,7 @@ function makeSIT(R){
     var o={drop:d+bob,tail:Math.sin(e*16)*(e>.6?20:8),hd:-6*Math.sin(Math.PI*u),ear:-8*Math.sin(Math.PI*u)};pose(o);return e>=S.ACT};
   S.fin=function(e,t,dt){var o={drop:1,tail:Math.sin(e*16)*22,hd:Math.sin(e*2.5)*10,ear:Math.sin(e*6)*5};
     if(e>.2){[h1,h2].forEach(function(h){h.setAttribute("opacity",1)});o.blink=1;mOpen.setAttribute("opacity",1);mClosed.setAttribute("opacity",0)}pose(o)};
+  S.ch=function(){return D};
   return S}
 
 /* ---------- ЛЯГ: кошка в комнате, камера низко у пола, вид сбоку ---------- */
@@ -179,6 +181,7 @@ function makeLIE(R){
   S.act=function(e,dt){var o={};if(e<1.1){var u=e/1.1;o.dx=34*(u-Math.sin(2*Math.PI*u)/(2*Math.PI));var ph=e/.275;o.stepF=Math.sin(Math.PI*ph)*8;o.stepB=Math.sin(Math.PI*ph+1.2)*8;o.bob=-Math.abs(Math.sin(Math.PI*ph))*2;o.tsw=Math.sin(e*6)*16}
     else{var u2=clamp((e-1.1)/.9,0,1);o.dx=34;o.lie=1-Math.pow(1-u2,3);o.tsw=0}pose(o);return e>=S.ACT};
   S.fin=function(e,t,dt){var o={lie:1,dx:34,hd:Math.sin(e*2)*2,bob:Math.sin(t*2)*1};if(e>.25){chap.setAttribute("opacity",1);ce.setAttribute("opacity",0)}pose(o)};
+  S.ch=function(){return CF};
   return S}
 
 /* ---------- ВСТАНЬ: медвежонок встаёт к улью; камера снизу, поднимается следом ---------- */
@@ -188,8 +191,8 @@ function makeSTAND(R){
   hill(R,"stFar","M-1600 900 L0 900 C300 860 700 880 1000 870 C1260 862 1440 856 1600 860 L3200 860","#CCF0A0");R.appendChild(grain(null,["stFar"]));
   var trees=el("g",{},R);[[420,900,1.6],[560,884,1.3],[900,880,1.5],[1000,876,1.2],[1380,866,1.4]].forEach(function(t){tree(trees,t[0],t[1],t[2])});
   el("path",{d:"M140 1100 C150 700 160 300 170 -100 L290 -100 C286 300 296 700 330 1100Z",fill:"#985038"},R);
-  el("path",{d:"M1120 1100 C1130 700 1130 300 1134 -100 L1240 -100 C1240 300 1250 700 1280 1100Z",fill:"#985038"},R);
   el("path",{d:"M1140 380 C1060 366 980 366 860 380 L860 398 C980 386 1060 388 1140 404Z",fill:"#985038"},R);
+  el("path",{d:"M1120 1100 C1130 700 1130 300 1134 -100 L1240 -100 C1240 300 1250 700 1280 1100Z",fill:"#985038"},R);
   var crown=el("g",{},R);for(var i=0;i<20;i++)el("circle",{cx:f1(rr(60,1480)),cy:f1(rr(-60,180)),r:f1(rr(60,100)),fill:["#289440","#2E9E46","#4AA010"][i%3]},crown);
   var hive=el("g",{transform:"translate(920 396) scale(1.6)"},R);el("path",{d:"M0 0 v18",stroke:"#985038","stroke-width":5},hive);
   for(var h=0;h<5;h++)el("ellipse",{cx:0,cy:34+h*20,rx:30+Math.sin((h+1)/6*Math.PI)*20,ry:13,fill:h%2?"#DCB510":"#FFD400"},hive);el("ellipse",{cx:4,cy:100,rx:10,ry:9,fill:"#2C3A5C"},hive);
@@ -232,4 +235,5 @@ function makeSTAND(R){
   S.act=function(e,dt){var u=clamp(e/1.0,0,1),r=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;var a2=clamp((e-.55)/.6,0,1);
     var o={rise:r,arm:80*a2+Math.sin(e*10)*6*a2,arm2:70*a2,hd:-10*a2};pose(o);return e>=S.ACT};
   S.fin=function(e,t,dt){var o={rise:1+Math.sin(e*3)*.02,arm:80+Math.sin(e*8)*14,arm2:70+Math.sin(e*8+1)*12,hd:-10+Math.sin(e*3)*4};if(e>.25){bh.setAttribute("opacity",1);o.blink=1}pose(o)};
+  S.ch=function(){return B};
   return S}
