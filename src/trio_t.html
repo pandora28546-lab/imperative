@@ -118,8 +118,9 @@ var FLY=(function(){
   var LB=el("g",{},LT); // branch (bobs)
   el("path",{d:"M335 472 C420 450 500 454 586 462 L586 476 C500 472 420 474 338 500Z",fill:"#985038"},LB);
   [[574,452],[592,462],[560,446]].forEach(function(c){el("ellipse",{cx:c[0],cy:c[1],rx:14,ry:7,fill:"#4AA010",transform:"rotate(-25 "+c[0]+" "+c[1]+")"},LB)});
-  [[230,300,92],[330,250,104],[410,320,80],[262,196,72],[366,168,62],[180,360,60]].forEach(function(c,i){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:i%2?"#2E9E46":"#289440"},LT)});
-  [[300,220,30],[380,280,24],[230,310,22]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#4AA010",opacity:.5},LT)});
+  LT.insertBefore(LB,LT.firstChild); // ветка под стволом
+  [[230,340,92],[330,290,104],[410,360,80],[262,236,72],[366,208,62],[180,400,60],[314,372,56]].forEach(function(c,i){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:i%2?"#2E9E46":"#289440"},LT)});
+  [[300,260,30],[380,320,24],[230,350,22]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#4AA010",opacity:.5},LT)});
   // right tree with hollow
   var RT=el("g",{},R);
   el("path",{d:"M1250 900 C1266 720 1258 560 1272 330 L1324 330 C1332 560 1338 720 1358 900Z",fill:"#985038"},RT);
@@ -127,8 +128,9 @@ var FLY=(function(){
   var RB=el("g",{},RT);
   el("path",{d:"M1276 432 C1220 424 1160 424 1100 430 L1100 442 C1160 438 1220 440 1274 452Z",fill:"#985038"},RB);
   [[1108,420],[1094,432]].forEach(function(c){el("ellipse",{cx:c[0],cy:c[1],rx:13,ry:6,fill:"#4AA010",transform:"rotate(20 "+c[0]+" "+c[1]+")"},RB)});
-  [[1230,270,78],[1320,220,92],[1386,292,72],[1292,150,62],[1420,210,50]].forEach(function(c,i){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:i%2?"#2E9E46":"#289440"},RT)});
-  [[1300,190,26],[1360,270,20]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#4AA010",opacity:.5},RT)});
+  RT.insertBefore(RB,RT.firstChild); // ветка под стволом
+  [[1230,300,78],[1320,250,92],[1386,322,72],[1292,180,62],[1420,240,50],[1298,350,54]].forEach(function(c,i){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:i%2?"#2E9E46":"#289440"},RT)});
+  [[1300,220,26],[1360,300,20]].forEach(function(c){el("circle",{cx:c[0],cy:c[1],r:c[2],fill:"#4AA010",opacity:.5},RT)});
   // falling leaves (on take-off)
   var leaves=[];for(var j=0;j<3;j++)leaves.push({e:el("ellipse",{rx:9,ry:4.5,fill:"#4AA010",opacity:0},R),on:false});
   // fireflies

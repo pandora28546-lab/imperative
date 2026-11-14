@@ -10,7 +10,7 @@ var S2K={
   makeJUMP:{lx:1,fur:{"url(#gFrog)":"#70CC10"}},
   makeSWIM:{lx:-1,fur:{"url(#gFish)":"#FF8A20"}},
   makeBEGI:{lx:1,fur:{"url(#bodyShade)":"#C3CFE2","url(#headShade)":"#C3CFE2"},ov:[["translate(1150 800)",1150,806,60],["translate(1330 715)",1330,716,34]]},
-  makeCRAWL:{lx:1,ov:[["translate(150 560)",150,566,120],["translate(560 570)",560,576,100],["translate(920 555)",920,561,130],["translate(1260 565)",1260,571,110],["translate(1720 560)",1720,566,120]]},
+  makeCRAWL:{lx:1,soft:false,ov:[["translate(150 572)",150,626,120],["translate(560 578)",560,624,100],["translate(920 566)",920,626,130],["translate(1260 570)",1260,620,110],["translate(1720 572)",1720,626,120]]},
   makeWALK:{lx:1},
   makeGALLOP:{lx:1,ov:[["translate(1390 470)",1390,472,95],["translate(1290 690)",1290,692,120]]},
   makeDANCE:{lx:1,ov:[["translate(380 690)",380,692,140],["translate(1230 760)",1230,762,50]]},
@@ -58,13 +58,23 @@ function s2all(root,fur,skip){[].slice.call(root.querySelectorAll("circle,ellips
     var base=line?st:f,sh=fur?(S2FUR[base]||[DK,.2]):(base==="#FFFFFF"?["#D3E2FF",1]:[DK,.2]);
     if(t==="circle"&&!e.getAttribute("transform")){var r=+e.getAttribute("r"),L=s2lune(e.parentNode,+e.getAttribute("cx")||0,+e.getAttribute("cy")||0,r,clamp(r*.28,2,24),lx,sh[0],sh[1]);if(L)e.parentNode.insertBefore(L,e.nextSibling);return}
     s2el(e,clamp(Math.min(b.w,b.h)*.14,2,14),lx,sh[0],sh[1])})}
+function s2eyes(ch){var P=[];[].forEach.call(ch.querySelectorAll("circle,ellipse"),function(e){if((e.getAttribute("fill")||"").toUpperCase()!==DK)return;var b=s2box(e);if(b.w<40)P.push(b)});
+  return function(e){var t=e.tagName;if(t!=="circle"&&t!=="ellipse")return false;var b=s2box(e);
+    return P.some(function(p){var cx=p.x+p.w/2,cy=p.y+p.h/2;return cx>b.x&&cx<b.x+b.w&&cy>b.y&&cy<b.y+b.h&&b.w<=p.w*5&&b.w>p.w*1.05})}}
+/* облако — одна тень на всё облако: голубая подложка из тех же кругов и белые копии со сдвигом к свету, обрезанные по облаку (без швов между кругами) */
+function s2clouds(R){[].forEach.call(R.querySelectorAll("g"),function(g){var cs=[].filter.call(g.children,function(c){return c.tagName==="circle"&&(c.getAttribute("fill")||"").toUpperCase()==="#FFFFFF"&&c.getAttribute("opacity")==null});
+    if(cs.length<4||cs.length!==[].filter.call(g.children,function(c){return c.tagName==="circle"}).length)return;
+    var id="s2c"+(S2N++),cp=el("clipPath",{id:id},DEFS),last=cs[cs.length-1],w=el("g",{"clip-path":"url(#"+id+")","data-ns":1});g.insertBefore(w,last.nextSibling);
+    var rs=0;cs.forEach(function(c){rs+=+c.getAttribute("r");c.setAttribute("data-ns",1);cp.appendChild(c.cloneNode(false))});var k=rs/cs.length*.22;
+    cs.forEach(function(c){var a=c.cloneNode(false);a.removeAttribute("data-ns");a.setAttribute("fill","#D3E2FF");w.appendChild(a)});
+    var sh=el("g",{transform:"translate("+f1(k*S2LX)+" "+f1(-k*.9)+")"},w);cs.forEach(function(c){var a=c.cloneNode(false);a.removeAttribute("data-ns");sh.appendChild(a)})})}
 function s2oval(parent,before,cx,cy,rx){var o=el("ellipse",{cx:cx,cy:cy,rx:rx,ry:f1(rx/11),fill:DK,opacity:.13,"data-ns":1});parent.insertBefore(o,before||parent.firstChild);return o}
 /* деревья: овал под кроной */
 var s2tree0=tree;tree=function(g,x,y,s){if(window.S2ON)s2oval(g,null,x,y+18*s,26*s);s2tree0(g,x,y,s)};
 /* какие формы двигаются сами (меняют свои атрибуты) — им тень-копию не делаем: копия бы не поехала за ними */
 var S2ATTR=["d","cx","cy","r","rx","ry","x","y","width","height","transform","opacity","fill","visibility","points"];
 function s2moving(R,S){var all=[].slice.call(R.querySelectorAll("circle,ellipse,rect,path")),snap=all.map(function(e){return S2ATTR.map(function(a){return e.getAttribute(a)}).join("|")}),mv=[];
-  try{S.reset();var t=0,dt=.05;for(var i=0;i<40;i++){t+=dt;S.ambient(t,dt,"ready");S.idle(t,dt,i>20)}
+  try{S.reset();var t=-1e4,dt=.05; /* время прогона — в далёком прошлом: метки моргания и подёргиваний сцены остаются позади настоящих часов игры */for(var i=0;i<40;i++){t+=dt;S.ambient(t,dt,"ready");S.idle(t,dt,i>20)}
     for(var e=0;e<=S.ACT+.05;e+=dt){t+=dt;S.ambient(t,dt,"act");if(S.act(e,dt,e===0,t))break}
     for(var e2=0;e2<3.2;e2+=dt){t+=dt;S.ambient(t,dt,"fin");S.fin(e2,t,dt)}}catch(x){}
   all.forEach(function(e,i){if(S2ATTR.map(function(a){return e.getAttribute(a)}).join("|")!==snap[i])mv.push(e)});
@@ -78,8 +88,10 @@ function style2(R,S,name,svg){var K=S2K[name];if(!K||!S.ch)return null;window.S2
   (K.ov||[]).forEach(function(o){var g=[].slice.call(R.querySelectorAll("g[transform]")).filter(function(x){return x.getAttribute("transform").indexOf(o[0])===0})[0];if(g)s2oval(g.parentNode,g,o[1],o[2],o[3])});
   /* солнце и луна без тени: группы со свечением */
   [].forEach.call(R.querySelectorAll("[fill='url(#gMoon)'],[fill='url(#sunGlow)']"),function(e){e.parentNode.setAttribute("data-ns",1)});
+  s2clouds(R);
   s2all(R,false,function(e){return ch.contains(e)});
-  s2all(ch,true,function(e){var f=(e.getAttribute("fill")||"").toUpperCase();return f==="#FC88A8"||f==="#FCC4BC"||f==="#F8A488"&&e.getAttribute("r")<12});
+  var isEye=s2eyes(ch);
+  s2all(ch,true,function(e){var f=(e.getAttribute("fill")||"").toUpperCase();return isEye(e)||f==="#FC88A8"||f==="#FCC4BC"||f==="#F8A488"&&e.getAttribute("r")<12});
   mv.forEach(function(e){e.removeAttribute("data-ns")});
   /* плоский овал персонажа — 13%; мягкая тень — на фигуру без овала */
   var oval=[].slice.call(ch.children).filter(function(c){return c.tagName==="ellipse"&&(c.getAttribute("fill")||"").toUpperCase()===DK&&+c.getAttribute("ry")<20})[0],fig=ch;
@@ -89,6 +101,6 @@ function style2(R,S,name,svg){var K=S2K[name];if(!K||!S.ch)return null;window.S2
   var root=svg.getScreenCTM(),fm=fig.getScreenCTM(),k=(root&&fm)?Math.hypot(fm.a,fm.b)/Math.hypot(root.a,root.b):1,unit=(vb[2]/1600)/(k||1);
   var b=fig.getBBox(),id="s2f"+(S2N++),fl=el("filter",{id:id,filterUnits:"userSpaceOnUse",x:f1(b.x-b.width),y:f1(b.y-b.height),width:f1(b.width*3),height:f1(b.height*3),"color-interpolation-filters":"sRGB"},DEFS);
   el("feDropShadow",{dx:0,dy:f1(11*unit),stdDeviation:f1(15*unit),"flood-color":DK,"flood-opacity":.28},fl);
-  var on=true;fig.setAttribute("filter","url(#"+id+")");
+  var on=K.soft!==false;if(on)fig.setAttribute("filter","url(#"+id+")");
   svg.style.display=disp;
-  return {soft:function(v){if(v===on)return;on=v;if(v)fig.setAttribute("filter","url(#"+id+")");else fig.removeAttribute("filter")},cam:!!S.cam}}
+  return {soft:function(v){if(K.soft===false)return;if(v===on)return;on=v;if(v)fig.setAttribute("filter","url(#"+id+")");else fig.removeAttribute("filter")},cam:!!S.cam}}

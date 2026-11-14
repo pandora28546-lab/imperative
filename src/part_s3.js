@@ -5,7 +5,7 @@
 function lgrad(id,stops,y1,y2){if(document.getElementById(id))return;var g=el("linearGradient",{id:id,gradientUnits:"userSpaceOnUse",x1:0,y1:y1,x2:0,y2:y2},DEFS);stops.forEach(function(s){el("stop",{offset:s[0],"stop-color":s[1]},g)})}
 function eyeG(p,x,y,r){var g=el("g",{},p);el("circle",{cx:x,cy:y,r:r,fill:"#2C3A5C"},g);el("circle",{cx:x+r*.35,cy:y-r*.4,r:r*.36,fill:"#FFFFFF"},g);return g}
 function happyArc(p,x,y,w,col){return el("path",{d:"M"+(x-w)+" "+(y+1)+" q"+w+" "+(-w*1.2)+" "+(2*w)+" 0",stroke:col||"#2C3A5C","stroke-width":Math.max(3,w*.55),fill:"none","stroke-linecap":"round",opacity:0},p)}
-function blinkT(e,cx,cy,k){tr(e,"translate("+cx+" "+cy+") scale(1 "+(1-(k||0)*.9).toFixed(2)+") translate("+(-cx)+" "+(-cy)+")")}
+function blinkT(e,cx,cy,k){tr(e,"translate("+cx+" "+cy+") scale(1 "+(1-(k||0)*.9).toFixed(2)+") translate("+(-cx)+" "+(-cy)+")");var hl=e.lastChild;if(hl&&hl.getAttribute("fill")==="#FFFFFF")hl.setAttribute("opacity",(k||0)>.4?0:1)}
 
 /* ---------- КАЧАЙСЯ: обезьянка на лиане между пальмами; камера стоит ---------- */
 function palm(R,x,y,h,lean,s,bananas){var g=el("g",{transform:"translate("+x+" "+y+") scale("+s+")"},R),n=9,px=0,py=0;
@@ -13,10 +13,10 @@ function palm(R,x,y,h,lean,s,bananas){var g=el("g",{transform:"translate("+x+" "
     el("path",{d:"M"+f1(x1-w)+" "+f1(y1)+" L"+f1(x2-w*.92)+" "+f1(y2-4)+" L"+f1(x2+w*.92)+" "+f1(y2-4)+" L"+f1(x1+w)+" "+f1(y1)+"Z",fill:i%2?"#C47860":"#B86E56"},g);
     el("path",{d:"M"+f1(x2-w*.92)+" "+f1(y2-2)+" L"+f1(x2+w*.92)+" "+f1(y2-2),stroke:"#985038","stroke-width":4,opacity:.6},g);px=x2;py=y2}
   var top=el("g",{transform:"translate("+f1(px)+" "+f1(py)+")"},g);
-  if(bananas){var b=el("g",{transform:"translate(14 18)"},top);for(var j=0;j<6;j++)el("path",{d:"M0 0 q"+(-26+j*10)+" 26 "+(-16+j*6)+" 58",stroke:"#FFD400","stroke-width":13,fill:"none","stroke-linecap":"round"},b);el("circle",{cx:0,cy:0,r:9,fill:"#4AA010"},b)}
-  el("circle",{cx:-16,cy:10,r:14,fill:"#985038"},top);el("circle",{cx:12,cy:14,r:14,fill:"#7A3E2C"},top);
   [[-150,40,-20],[-120,-30,-55],[-40,-70,-85],[60,-70,-100],[140,-24,-130],[160,44,-160],[-10,40,90]].forEach(function(f,i){var fr=el("g",{transform:"rotate("+f[2]+")"},top);
     el("path",{d:"M0 0 Q90 -40 190 10 Q100 -10 0 12Z",fill:i%2?"#289440":"#4AA010"},fr);for(var k2=1;k2<8;k2++)el("path",{d:"M"+(k2*22)+" "+f1(-14+k2*1.8)+" l14 26",stroke:i%2?"#289440":"#4AA010","stroke-width":9,"stroke-linecap":"round"},fr)});
+  if(bananas){var b=el("g",{transform:"translate(14 18)"},top);for(var j=0;j<6;j++)el("path",{d:"M0 0 q"+(-26+j*10)+" 26 "+(-16+j*6)+" 58",stroke:"#FFD400","stroke-width":13,fill:"none","stroke-linecap":"round"},b);el("circle",{cx:0,cy:0,r:9,fill:"#4AA010"},b)}
+  el("circle",{cx:-16,cy:10,r:14,fill:"#985038"},top);el("circle",{cx:12,cy:14,r:14,fill:"#7A3E2C"},top);
   return g}
 function makeSWING(R){
   var S={};S.vb="275 95 1050 700";S.ACT=5.4;S.snd="swing";
@@ -73,7 +73,7 @@ function makeSIT(R){
   el("rect",{x:-60,y:390,width:2000,height:20,rx:6,fill:"#C47860"},fence);el("rect",{x:-60,y:460,width:2000,height:20,rx:6,fill:"#C47860"},fence);
   hill(R,"sitG","M-1600 520 L0 520 C400 510 900 516 1600 512 L3200 512","#88A848");R.appendChild(grain(null,["sitG"]));
   var tex=el("g",{},R);blades(tex,360,-100,1700,515,960,"#6E9A30",16,2.8);
-  var dh=el("g",{transform:"translate(430 640)"},R);el("path",{d:"M-150 0 V-170 H150 V0Z",fill:"#6B91D6"},dh);el("path",{d:"M-176 -160 L0 -280 L176 -160 L156 -146 L0 -252 L-156 -146Z",fill:"#F97A4F"},dh);
+  var dh=el("g",{transform:"translate(430 640)"},R);el("path",{d:"M-150 0 V-170 H150 V0Z",fill:"#6B91D6"},dh);el("path",{d:"M-150 -168 L0 -266 L150 -168 V-160 H-150Z",fill:"#6B91D6"},dh);el("path",{d:"M-176 -160 L0 -280 L176 -160 L156 -146 L0 -252 L-156 -146Z",fill:"#F97A4F"},dh);
   el("path",{d:"M-60 0 V-80 A60 60 0 0 1 60 -80 V0Z",fill:"#2C3A5C"},dh);for(var k=0;k<4;k++)el("path",{d:"M-150 "+(-34-k*36)+" H150",stroke:"#98B8FC","stroke-width":4,opacity:.7},dh);
   el("rect",{x:-60,y:-214,width:120,height:30,rx:8,fill:"#FFFCDC"},dh);
   var bowl=el("g",{transform:"translate(1160 800)"},R);el("ellipse",{cx:0,cy:-6,rx:66,ry:18,fill:"#2C3A5C",opacity:.15},bowl);el("path",{d:"M-62 -40 L-48 0 H48 L62 -40Z",fill:"#F97A4F"},bowl);el("ellipse",{cx:0,cy:-40,rx:62,ry:14,fill:"#FDDDD0"},bowl);
@@ -84,7 +84,7 @@ function makeSIT(R){
   var hind=el("g",{},D);[[-50,-36],[50,-36]].forEach(function(c){el("ellipse",{cx:c[0],cy:c[1],rx:38,ry:32,fill:"#C8987E"},hind)});
   [[-66,-6],[66,-6]].forEach(function(c){el("ellipse",{cx:c[0],cy:c[1],rx:22,ry:10,fill:"#FFFCDC"},hind)});
   var legsF=el("g",{},D),body=el("g",{},D);
-  var tail=el("g",{},body);el("path",{d:"M30 -66 Q78 -70 102 -100",stroke:"#D0A090","stroke-width":16,fill:"none","stroke-linecap":"round"},tail);el("circle",{cx:103,cy:-102,r:8.5,fill:"#FFFCDC"},tail);
+  var tail=el("g",{});D.insertBefore(tail,hind);el("path",{d:"M30 -66 Q78 -70 102 -100",stroke:"#D0A090","stroke-width":16,fill:"none","stroke-linecap":"round"},tail);el("circle",{cx:103,cy:-102,r:8.5,fill:"#FFFCDC"},tail);
   el("ellipse",{cx:0,cy:-112,rx:56,ry:68,fill:"#D0A090"},body);el("ellipse",{cx:0,cy:-100,rx:30,ry:46,fill:"#FFFCDC"},body);
   el("path",{d:"M-40 -150 Q0 -132 40 -150",stroke:"#F97A4F","stroke-width":10,fill:"none","stroke-linecap":"round"},body);el("circle",{cx:0,cy:-134,r:8,fill:"#FFD400"},body);
   el("path",{d:"M-44 -100 C-46 -70 -42 -36 -40 -12 L-10 -12 C-8 -40 -6 -74 -6 -100 A19 19 0 0 0 -44 -100Z",fill:"#D0A090"},legsF);el("path",{d:"M44 -100 C46 -70 42 -36 40 -12 L10 -12 C8 -40 6 -74 6 -100 A19 19 0 0 1 44 -100Z",fill:"#D0A090"},legsF);
@@ -106,7 +106,7 @@ function makeSIT(R){
   S.center=function(){return{x:DX,y:DY-150*SC,sc:SC}};
   function pose(o){var d=o.drop||0;tr(body,"translate("+f1(o.sx||0)+" "+f1(d*34)+")");tr(legsF,"translate(0 "+f1(-d*2)+") scale(1 "+(1-d*.28).toFixed(3)+")");
     tr(hind,"translate(0 "+f1((1-d)*4)+") scale("+(0.72+.28*d).toFixed(3)+" "+(0.72+.28*d).toFixed(3)+")");
-    tr(tail,"rotate("+f1((o.tail||0)+d*22)+" 30 -66)");tr(head,"rotate("+f1(o.hd||0)+" 0 -170)");
+    tr(tail,"translate("+f1(o.sx||0)+" "+f1(d*34)+") rotate("+f1((o.tail||0)+d*22)+" 30 -66)");tr(head,"rotate("+f1(o.hd||0)+" 0 -170)");
     tr(earL,"rotate("+f1(o.ear||0)+" -52 -236)");tr(earR,"rotate("+f1(-(o.ear||0))+" 52 -236)");
     blinkT(e1,-21,-224,o.blink);blinkT(e2,21,-224,o.blink)}
   S.ambient=function(t,dt){flowersSway(flowers,t,dt,0,0,false)};
