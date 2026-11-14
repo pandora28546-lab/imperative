@@ -44,12 +44,13 @@ function makeOPEN(R){
   S.act=function(e){S.cu=clamp(e/S.ACT,0,1);var k=seg(e,.25,1.3),o={k:k*(1+.04*Math.sin(Math.max(0,e-1.3)*6)),bob:-8*Math.sin(Math.PI*clamp(e/.4,0,1))+Math.sin(e*1.4)*3,rot:0};
     o.blink=e<.3?0:k>.5?.6:0;pose(o);return e>=S.ACT};
   S.fin=function(e,t){S.cu=1;if(e>.25)happy(true,[e1,e2],[a1,a2]);pose({k:1+.03*Math.sin(e*3),bob:Math.sin(e*1.4)*3,rot:Math.sin(e*2.2)*3*Math.min(1,e/.4)})};
+  S.ch=function(){return H};
   return S}
 
 /* ---------- ЗАКРОЙ: крокодил на илистой кочке в мангровом болоте закрывает пасть; общий план сбоку, камера стоит ---------- */
 function mangrove(g,x,y,s,k){var t=el("g",{transform:"translate("+x+" "+y+") scale("+s+")"},g);
   [[-70,-40],[-40,-20],[40,-20],[76,-40],[-10,0]].forEach(function(r){el("path",{d:"M0 -120 Q"+f1(r[0]*.4)+" -70 "+r[0]+" "+(20+r[1]*0),stroke:"#985038","stroke-width":9,fill:"none","stroke-linecap":"round"},t)});
-  el("path",{d:"M-10 -110 C-8 -160 -6 -200 -4 -240 L8 -240 C10 -200 12 -160 14 -110Z",fill:"#985038"},t);
+  el("path",{d:"M-10 -110 C-8 -160 -6 -200 -4 -240 L8 -240 C10 -200 12 -160 14 -110Z",fill:"#985038","data-ns":1},t); /* ствол без тени: на стыке с корнями тень даёт шов */
   [[0,-270,70],[-60,-240,50],[64,-244,52],[-24,-310,46],[30,-306,44]].forEach(function(c,i){el("ellipse",{cx:c[0],cy:c[1],rx:c[2],ry:c[2]*.75,fill:["#289440","#2E9E46","#4AA010"][(i+k)%3]},t)});
   for(var i=0;i<6;i++)el("circle",{cx:f1(rr(-60,60)),cy:f1(rr(-320,-240)),r:f1(rr(10,18)),fill:"#70CC10",opacity:.45},t);return t}
 function makeCLOSE(R){
@@ -97,6 +98,7 @@ function makeCLOSE(R){
     if(e>=.34&&!S.hit){S.hit=1;emit(drops,10,CX+190*SC,CY-30*SC,-160,160,-420,-200,1)}
     var w=Math.max(0,e-.34);o.bob=e>.34?-6*Math.sin(w*14)*Math.exp(-w*4):0;o.rot=e>.34?-1.5*Math.sin(w*14)*Math.exp(-w*4):0;o.tl=Math.sin(e*6)*6;pose(o);return e>=S.ACT};
   S.fin=function(e,t){if(e>.25)happy(true,[ce],[ch]);pose({k:0,tl:Math.sin(e*5)*12*Math.max(.3,1-e/2),bob:-Math.abs(Math.sin(e*4))*3*Math.max(0,1-e/1.5)})};
+  S.ch=function(){return K};
   return S}
 
 /* ---------- ВОЗЬМИ: кенгурёнок в австралийской пустоши допрыгивает до мячика, берёт его и кладёт в сумку; камера ведёт ---------- */
@@ -126,17 +128,17 @@ function makeTAKE(R){
   var thigh=el("g",{},KB);el("ellipse",{cx:-12,cy:-40,rx:30,ry:36,fill:"#A86448",transform:"rotate(-20 -12 -40)"},thigh);
   el("path",{d:"M-18 -6 L54 -8 Q66 -3 54 2 L-18 2Z",fill:"#A86448",stroke:"#A86448","stroke-width":7,"stroke-linejoin":"round"},thigh);
   el("path",{d:"M-30 -56 C-36 -94 -16 -138 14 -148 C38 -154 48 -128 44 -98 C40 -72 30 -46 10 -34 C-8 -26 -26 -36 -30 -56Z",fill:"#C47860"},KB);
-  el("path",{d:"M10 -136 C30 -132 38 -110 32 -84 C26 -62 16 -46 2 -40 C10 -70 6 -110 10 -136Z",fill:"#FDE6C4"},KB);
+  el("path",{d:"M10 -136 C30 -132 38 -110 32 -84 C26 -62 16 -46 2 -40 C10 -70 6 -110 10 -136Z",fill:"#FDE6C4","data-ns":1},KB);
   var pBall=mkToy(KB,.3);tr(pBall,"translate(19 -69)");pBall.setAttribute("opacity",0);
-  el("path",{d:"M5 -74 Q19 -62 33 -76 C31 -62 24 -52 12 -48 C7 -56 5 -64 5 -74Z",fill:"#FDE6C4"},KB);el("path",{d:"M5 -74 Q19 -62 33 -76",stroke:"#A86448","stroke-width":3.4,fill:"none","stroke-linecap":"round"},KB);
-  el("path",{d:"M4 -138 C8 -158 22 -176 38 -176 L46 -160 C36 -150 26 -140 22 -126Z",fill:"#C47860"},KB);
+  el("path",{d:"M5 -74 Q19 -62 33 -76 C31 -62 24 -52 12 -48 C7 -56 5 -64 5 -74Z",fill:"#FDE6C4","data-ns":1},KB);el("path",{d:"M5 -74 Q19 -62 33 -76",stroke:"#A86448","stroke-width":3.4,fill:"none","stroke-linecap":"round"},KB);
+  el("path",{d:"M4 -138 C8 -158 22 -176 38 -176 L46 -160 C36 -150 26 -140 22 -126Z",fill:"#C47860","data-ns":1},KB); /* шея без тени */
   var head=el("g",{},KB);
   [[22,-206,-16],[36,-208,8]].forEach(function(p){el("ellipse",{cx:p[0],cy:p[1],rx:9,ry:23,fill:"#C47860",transform:"rotate("+p[2]+" "+p[0]+" "+p[1]+")"},head);el("ellipse",{cx:p[0],cy:p[1]+2,rx:4.5,ry:14,fill:"#FCC4BC",transform:"rotate("+p[2]+" "+p[0]+" "+p[1]+")"},head)});
   el("ellipse",{cx:34,cy:-174,rx:22,ry:19,fill:"#C47860"},head);
-  el("path",{d:"M42 -184 C60 -186 76 -178 80 -170 C76 -160 58 -158 42 -162Z",fill:"#C47860"},head);el("path",{d:"M50 -166 C60 -164 70 -166 76 -168",stroke:"#A86448","stroke-width":2.4,fill:"none","stroke-linecap":"round"},head);
+  el("path",{d:"M42 -184 C60 -186 76 -178 80 -170 C76 -160 58 -158 42 -162Z",fill:"#C47860","data-ns":1},head); /* морда без тени */el("path",{d:"M50 -166 C60 -164 70 -166 76 -168",stroke:"#A86448","stroke-width":2.4,fill:"none","stroke-linecap":"round"},head);
   el("circle",{cx:79,cy:-174,r:5,fill:"#2C3A5C"},head);el("circle",{cx:36,cy:-164,r:6,fill:"#FC88A8",opacity:.4},head);
   var ke=eyeG(head,46,-180,5),kh=happyArc(head,46,-179,6);
-  var armB=strokeLeg(KB,"","#985038",10),armF=strokeLeg(KB,"","#A86448",11),hB=el("ellipse",{rx:6.5,ry:5.5,fill:"#985038"},KB),hF=el("ellipse",{rx:7,ry:6,fill:"#A86448"},KB);
+  var armB=strokeLeg(KB,"","#985038",10),armF=strokeLeg(KB,"","#A86448",11),hB=el("ellipse",{rx:6.5,ry:5.5,fill:"#985038","data-ns":1},KB),hF=el("ellipse",{rx:7,ry:6,fill:"#A86448","data-ns":1},KB);
   var ball=mkToy(R,.95);
   var X0=800,X1=1080,tw={};S.kx=X0;S.ky=KY;S.lean=0;
   S.init=function(){};
@@ -164,6 +166,7 @@ function makeTAKE(R){
       if(e>=2.95){ball.setAttribute("opacity",0);pBall.setAttribute("opacity",1)}}
     pose(o);return e>=S.ACT};
   S.fin=function(e,t){S.kx=X1;S.lean=0;ball.setAttribute("opacity",0);pBall.setAttribute("opacity",1);if(e>.25)happy(true,[ke],[kh]);pose({hd:-4+Math.sin(e*2.4)*6,h:24*Math.abs(Math.sin(e*4))*Math.max(0,1-e/1.6),tl:Math.sin(e*3)*6,hand:{x:34,y:-82}})};
+  S.ch=function(){return K};
   return S}
 
 /* ---------- ДАЙ: большая панда отдаёт бамбук малой панде, которая просит лапкой; средний план, камера стоит ---------- */
@@ -176,7 +179,7 @@ function makeGIVE(R){
   [[340,26,"#B0E060",200],[420,20,"#B0E060",240],[1180,24,"#B0E060",210],[1260,30,"#B0E060",180],[560,16,"#CCF0A0",300],[860,14,"#CCF0A0",320],[1090,18,"#CCF0A0",280]].forEach(function(s){stalk(grove,s[0],s[1],s[2],s[3])});
   groundG(R,"g3gG","M-1600 720 L0 720 C400 708 900 724 1600 714 L3200 714","#88A848");
   var tex=el("g",{},R);blades(tex,260,200,1400,724,860,"#6E9A30",14,2.6);
-  [[380,800,1.3],[1240,820,1.4],[1300,760,1.1],[560,840,1.2]].forEach(function(f,k){flower(R,f[0],f[1],f[2],k%4,null)});
+  [[400,740,1.05],[1230,740,1.05],[340,825,1.3],[850,830,1.3],[1250,825,1.3]].forEach(function(f,k){flower(R,f[0],f[1],f[2],k%4,null)});
   // большая панда (спереди), чуть повёрнута к малой
   var PX=640,PY=780,SC=1.6;
   el("ellipse",{cx:PX,cy:PY+4,rx:82*SC,ry:10*SC,fill:"#2C3A5C",opacity:.13},R);
@@ -243,4 +246,5 @@ function makeGIVE(R){
     o.qtw=Math.sin(e*5)*10;pose(o);return e>=S.ACT};
   S.fin=function(e,t){if(e>.25){happy(true,eyes,arcs);happy(true,qeyes,qarcs)}var k=Math.min(1,e/.4);
     pose({b:{x:HUG.x,y:HUG.y-40,r:-6+Math.sin(e*2.4)*4*k},q1:HUG,q2:{x:HUG.x+18,y:HUG.y+12},pr:{x:BHOLD.x-40,y:-60*SC+PY},hd:6+Math.sin(e*2.2)*4*k,rot:Math.sin(e*2.2)*2*k,qhd:-2+Math.sin(e*2.6)*5*k,qbob:-Math.abs(Math.sin(e*4))*4*Math.max(0,1-e/1.6),qtw:Math.sin(e*3)*10})};
+  S.ch=function(){return [P,Q]};
   return S}

@@ -53,6 +53,7 @@ function makeCLAP(R){
   S.act=function(e){var c=Math.cos(2*Math.PI*(e-.25)/.5),hit=Math.pow(Math.max(0,c),6);
     var o={a:102+44*c,bob:-6*hit,sy:1-.03*hit,hd:7*Math.sin(Math.PI*e),rot:3*Math.sin(Math.PI*2*e/1.0)};pose(o);return e>=S.ACT};
   S.fin=function(e,t){if(e>.25)happy(true,[e1,e2],[h1,h2]);var k=Math.min(1,e/.4);pose({a:60+10*Math.sin(e*3)*k,rot:4*Math.sin(e*2.4)*k,hd:-6*Math.sin(e*2.4)*k,sy:1+.012*Math.sin(t*2.4)})};
+  S.ch=function(){return K};
   return S}
 
 /* ---------- ПОЙ: синичка на ветке насвистывает песенку; крупный план снизу, камера наезжает ---------- */
@@ -96,6 +97,7 @@ function makeSING(R){
   S.idle=function(t,dt,attn){var o={hd:Math.sin(t*1.1)*6,tl:Math.sin(t*2)*4,blink:blinkK(tw,t)};var ht=idleTimer(tw,"hop",t,1.6,2.8);if(ht<.3)o.hd+=Math.sin(ht*20)*12;if(attn)o.hd=-4;pose(o)};
   S.act=function(e,dt){S.cu=clamp(e/S.ACT,0,1);var k=beakK(e);pose({beak:k,hd:-14*k-6*Math.sin(e*3),tl:-10*k+4*Math.sin(e*9),wg:-6*k});return e>=S.ACT};
   S.fin=function(e,t){S.cu=1;if(e>.25)happy(true,[be],[bh]);var k=Math.min(1,e/.4);pose({hd:-6+Math.sin(e*3)*6*k,tl:Math.sin(e*8)*10*Math.max(0,1-e/1.5),wg:-8*Math.abs(Math.sin(e*10))*Math.max(0,1-e/1.2)})};
+  S.ch=function(){return K};
   return S}
 
 /* ---------- РИСУЙ: свинка рисует солнышко на листе; сверху наискосок, камера стоит ---------- */
@@ -106,7 +108,7 @@ function makeDRAW(R){
   var trees=el("g",{},R);[[380,300,1.1],[520,292,.8],[1180,286,1],[1330,290,.85]].forEach(function(t){tree(trees,t[0],t[1],t[2])});
   groundG(R,"g3dG","M-1600 340 L0 340 C400 324 900 336 1600 330 L3200 330","#88A848");
   var tex=el("g",{},R);blades(tex,320,-100,1700,350,900,"#6E9A30",14,2.6);
-  var flowers=[];[[330,520,1.3],[420,760,1.5],[1240,480,1.3],[1290,780,1.5],[1140,370,1],[480,400,1]].forEach(function(f,k){flower(R,f[0],f[1],f[2],k%4,flowers)});
+  var flowers=[];[[320,420,1],[470,420,1],[1130,420,1],[1280,420,1],[350,610,1.25],[1250,610,1.25],[330,800,1.5],[1270,800,1.5]].forEach(function(f,k){flower(R,f[0],f[1],f[2],k%4,flowers)});
   // свинка стоит за листом
   var PX=800,PY=632,SC=1.5;
   el("ellipse",{cx:PX,cy:PY+4,rx:70*SC,ry:12*SC,fill:"#2C3A5C",opacity:.13},R);var P=el("g",{},R);
@@ -158,6 +160,7 @@ function makeDRAW(R){
     if(e>3.4)face.setAttribute("opacity",clamp((e-3.4)/.3,0,1).toFixed(2));
     o.tx=tx;o.ty=ty;pose(o);return e>=S.ACT};
   S.fin=function(e,t){if(e>.25)happy(true,[pe1,pe2],[ph1,ph2]);var k=Math.min(1,e/.4);pose({tx:REST.x,ty:REST.y-30*Math.abs(Math.sin(e*4))*Math.max(0,1-e/1.6),hd:Math.sin(e*3)*6*k,bob:-Math.abs(Math.sin(e*5))*4*Math.max(0,1-e/1.6),lk:0})};
+  S.ch=function(){return P};
   return S}
 
 /* ---------- СПИ: лисёнок под деревом зевает, сворачивается и засыпает; вечер, камера отъезжает ---------- */
@@ -175,7 +178,7 @@ function makeSLEEP(R){
   for(var i=0;i<6;i++)el("circle",{cx:f1(rr(300,540)),cy:f1(rr(240,400)),r:f1(rr(16,30)),fill:"#70CC10",opacity:.45},tr0);
   groundG(R,"g3sG","M-1600 820 L0 820 C400 800 900 830 1600 812 L3200 812","#88A848");
   var tex=el("g",{},R);blades(tex,360,-100,1700,826,1180,"#6E9A30",16,2.8);
-  var flowers=[];[[600,900,1.4],[1160,880,1.5],[1340,960,1.6],[240,950,1.5],[980,1000,1.6]].forEach(function(f,k){flower(R,f[0],f[1],f[2],k%4,flowers)});
+  var flowers=[];[[300,880,1.4],[1300,880,1.4],[200,1000,1.6],[480,1000,1.6],[760,1000,1.6],[1040,1000,1.6],[1320,1000,1.6]].forEach(function(f,k){flower(R,f[0],f[1],f[2],k%4,flowers)});
   var tint=bgRect(R,"#6B91D6"),tint2=bgRect(R,"#2C3A5C");
   var FX=820,FY=836,SC=1.6;
   el("ellipse",{cx:FX-20,cy:FY+2,rx:110*SC,ry:11*SC,fill:"#2C3A5C",opacity:.13},R);
@@ -185,13 +188,15 @@ function makeSLEEP(R){
   el("ellipse",{cx:46,cy:-36,rx:20,ry:22,fill:"#FFFFFF"},FB);
   [[56,-8],[70,-3]].forEach(function(p){el("ellipse",{cx:p[0],cy:p[1],rx:30,ry:9,fill:"#E0683E"},FB);el("ellipse",{cx:p[0]+24,cy:p[1],rx:8,ry:8,fill:"#985038"},FB)});
   var head=el("g",{},FB);
-  el("path",{d:"M64 -96 Q68 -130 90 -104Z",fill:"#F97A4F",stroke:"#F97A4F","stroke-width":8,"stroke-linejoin":"round"},head);el("path",{d:"M70 -100 Q72 -118 83 -104Z",fill:"#2C3A5C"},head);
-  el("path",{d:"M94 -102 Q106 -132 114 -94Z",fill:"#F97A4F",stroke:"#F97A4F","stroke-width":8,"stroke-linejoin":"round"},head);el("path",{d:"M99 -100 Q106 -118 110 -98Z",fill:"#2C3A5C"},head);
+  /* ушки острее */
+  el("path",{d:"M62 -96 L73 -122 L90 -104Z",fill:"#F97A4F",stroke:"#F97A4F","stroke-width":4,"stroke-linejoin":"round"},head);el("path",{d:"M69 -100 L74 -115 L83 -104Z",fill:"#2C3A5C"},head);
+  el("path",{d:"M94 -103 L110 -125 L115 -93Z",fill:"#F97A4F",stroke:"#F97A4F","stroke-width":4,"stroke-linejoin":"round"},head);el("path",{d:"M99 -101 L108 -117 L110 -97Z",fill:"#2C3A5C"},head);
   el("circle",{cx:88,cy:-72,r:34,fill:"#F97A4F"},head);
-  el("path",{d:"M84 -64 Q112 -72 134 -63 Q122 -44 94 -46Z",fill:"#FFFFFF"},head);
-  var mouth=el("ellipse",{cx:112,cy:-52,rx:0,ry:0,fill:"#7A3E2C"},head),tongue=el("ellipse",{cx:112,cy:-48,rx:0,ry:0,fill:"#FC88A8"},head);
-  el("circle",{cx:134,cy:-63,r:6.5,fill:"#2C3A5C"},head);el("circle",{cx:82,cy:-58,r:7,fill:"#FC88A8",opacity:.4},head);
-  var fe=eyeG(head,100,-79,5.5),sl=el("path",{d:"M93 -79 q7 6 14 0",stroke:"#2C3A5C","stroke-width":3.4,fill:"none","stroke-linecap":"round",opacity:0},head),smile=el("path",{d:"M108 -54 q8 5 15 -1",stroke:"#2C3A5C","stroke-width":2.8,fill:"none","stroke-linecap":"round",opacity:0},head);
+  /* мордочка чуть вниз, без тени; точки от усов */
+  el("path",{d:"M84 -64 Q114 -72 139 -58 Q124 -42 94 -46Z",fill:"#FFFFFF","data-ns":1},head);[[112,-56],[118,-54],[115,-50]].forEach(function(d){el("circle",{cx:d[0],cy:d[1],r:1.7,fill:"#2C3A5C",opacity:.45},head)});
+  var mouth=el("ellipse",{cx:110,cy:-47,rx:0,ry:0,fill:"#7A3E2C"},head),tongue=el("ellipse",{cx:110,cy:-43,rx:0,ry:0,fill:"#FC88A8"},head);
+  el("circle",{cx:139,cy:-58,r:6.5,fill:"#2C3A5C"},head);el("circle",{cx:73,cy:-64,r:7,fill:"#FC88A8",opacity:.55},head); /* носик вперёд и кончиком вниз; румянец на щеке, не на мордочке */
+  var fe=eyeG(head,100,-79,5.5),sl=el("path",{d:"M93 -79 q7 6 14 0",stroke:"#2C3A5C","stroke-width":3.4,fill:"none","stroke-linecap":"round",opacity:0},head),smile=el("path",{d:"M104 -47 q8 5 15 -1",stroke:"#2C3A5C","stroke-width":2.8,fill:"none","stroke-linecap":"round",opacity:0},head);
   var tail=el("path",{d:"",stroke:"#F97A4F","stroke-width":36,fill:"none","stroke-linecap":"round"},FB),tip=el("circle",{r:18,fill:"#FFFFFF"},FB);
   var T0=[-62,-30,-110,-36,-150,-14,-196,-10],T1=[-62,-30,-120,6,-20,22,64,2],tw={};
   S.init=function(){};
@@ -213,4 +218,5 @@ function makeSLEEP(R){
     o.curl=seg(e,1.4,2.7);o.br=1+.03*Math.sin(Math.max(0,e-2.2)*3)*seg(e,2.2,2.6);pose(o);return e>=S.ACT};
   S.fin=function(e,t){S.cu=1;S.night=1;S.deep=1;fe.setAttribute("opacity",0);sl.setAttribute("opacity",1);if(e>.25)smile.setAttribute("opacity",clamp((e-.25)/.3,0,1).toFixed(2));
     pose({ha:28,hy:6,curl:1,br:1+.03*Math.sin(e*2.6),blink:1,tw:Math.sin(e*1.3)*2})};
+  S.ch=function(){return F};
   return S}

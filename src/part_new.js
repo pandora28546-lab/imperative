@@ -396,6 +396,10 @@ function makeKNOCK(R){
   el("path",{d:"M-5 5 q5 4 10 0",stroke:"#2C3A5C","stroke-width":2,fill:"none","stroke-linecap":"round"},cat);el("path",{d:"M-6 -14 l-3 -8 M6 -14 l3 -8",stroke:"#4AA010","stroke-width":2.5,"stroke-linecap":"round"},cat);
   var chips=[];for(i=0;i<14;i++)chips.push({e:el("ellipse",{rx:5,ry:2.6,fill:i%2?"#D0A090":"#C47860",opacity:0},R),life:0});
   // woodpecker (facing left, clinging to trunk's right side)
+  /* ветка, на которой сидит дятел: растёт из ствола (слоем под ним), с листьями на конце */
+  T.insertBefore(el("path",{d:"M690 470 C740 466 800 468 880 452 L884 466 C806 486 744 486 690 490Z",fill:"#985038"}),T.firstChild);
+  /* листья растут из конца ветки и закрывают его срез: основания листьев лежат поверх кончика */
+  [[866,458,-30,"#4AA010"],[864,462,28,"#70CC10"],[870,454,-70,"#4AA010"],[868,460,0,"#70CC10"]].forEach(function(l){el("ellipse",{cx:l[0]+20,cy:l[1],rx:24,ry:10,fill:l[3],transform:"rotate("+l[2]+" "+l[0]+" "+l[1]+")"},R)});
   var W=el("g",{},R),WB=el("g",{},W);
   el("path",{d:"M24 -10 L42 40 L28 36 L18 -6Z",fill:"#234888"},WB);
   el("ellipse",{cx:22,cy:-58,rx:30,ry:52,fill:"#2C3A5C"},WB);el("ellipse",{cx:12,cy:-50,rx:16,ry:36,fill:"#FFFFFF"},WB);
@@ -426,4 +430,5 @@ function makeKNOCK(R){
   S.fin=function(e,t,dt){var o={y:WY};o.rot=6*Math.sin(Math.min(1,e/.4)*Math.PI*.5);o.hd=10*Math.sin(Math.min(1,e/.4)*Math.PI*.5)+Math.sin(e*6)*3;
     tr(holeS,"scale(1)");var c=clamp((e-.3)/.4,0,1);tr(cat,"translate(0 "+f1(40-40*(1-Math.pow(1-c,3)))+")");
     if(e>.3){wHappy.setAttribute("opacity",1);weye.setAttribute("opacity",0)}pose(o)};
+  S.ch=function(){return W};
   return S}
